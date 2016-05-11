@@ -31,6 +31,29 @@ function zenci_google_ce_settings() {
     '#description' => t('You need to get Service Account Key here: https://console.cloud.google.com/iam-admin/serviceaccounts/serviceaccounts-zero'),
     '#disabled' => !empty($private_key) ? TRUE : FALSE,
   );
+  
+  $token = $config->get('token');
+
+  if($token){
+    $token_expire = $config->get('token_expire');
+    $now = time();
+    
+    $description = '';
+    if($token_expire < $now){
+      $description = t('Token expired.');
+    }
+    else{
+      $description = t('This token expire in !sec seconds', array('!sec' => $token_expire - $now));
+    }
+    
+    $form['token'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Current token'),
+      '#default_value' => $config->get('token'),
+      '#description' => $description,
+      '#disabled' => TRUE,
+    );
+  }
 
   
   $form['actions']['#type'] = 'actions';
