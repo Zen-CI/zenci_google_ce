@@ -1,0 +1,8 @@
+name = Google Compute Engine integration for ZenCI webhook module
+description = Respond on zenci_webhook with config information and prepare target for testing.
+backdrop = 1.x
+version = 1.x-1.0
+package = API
+configure = admin/config/system/google_ce
+type = module
+dependencies[] = zenci_webhook

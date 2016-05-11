@@ -1,0 +1,280 @@
+<?php
+/**
+ * @file
+ * Prepare testing environment on DigitalOcean.
+ * Spin Up VPS to process tests and destroy after.
+ */
+ 
+ // URL ZenCI GoogleComputeEngine API.
+define('ZENCI_GOOGLE_OAUTH_TOKEN_URI', 'https://www.googleapis.com/oauth2/v4/token');
+ 
+/**
+ * Implements hook_config_info().
+ */
+function zenci_google_ce_config_info() {
+  $prefixes['zenci_google_ce.settings'] = array(
+    'label' => t('ZenCI GoogleComputeEngine API settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function zenci_google_ce_permission() {
+  return array(
+    'test job view' => array(
+      'title' => t('Access job results'),
+    ),
+  );
+}
+
+
+/**
+ * Implements hook_menu().
+ */
+function zenci_google_ce_menu() {
+  $items = array();
+
+  $items['admin/config/system/google_ce'] = array(
+    'title' => 'GoogleComputeEngine settings',
+    'description' => 'GoogleComputeEngine settings.',
+    'page callback' => 'zenci_google_ce_templates',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'zenci_google_ce.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  $items['admin/config/system/google_ce/list'] = array(
+    'title' => 'GoogleComputeEngine Templates',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  // Admin settings page.
+  $items['admin/config/system/google_ce/settings'] = array(
+    'title' => 'GoogleComputeEngine settings',
+    'description' => 'GoogleComputeEngine settings.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('zenci_google_ce_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'zenci_google_ce.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+  );
+
+  $items['admin/config/system/google_ce/template_add'] = array(
+    'title' => 'Add template',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('zenci_google_ce_template', 4),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'zenci_google_ce.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/config/system/google_ce/instance_add'] = array(
+    'title' => 'Add template',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('zenci_google_ce_instance', 4),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'zenci_google_ce.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/config/system/google_ce/%/delete'] = array(
+    'title' => 'Remove template',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('zenci_google_ce_template_remove', 4),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'zenci_google_ce.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+  
+
+  $items['zenci_joblist'] = array(
+    'title' => 'ZenCI tests results',
+    'description' => 'View result of tests.',
+    'page callback' => 'zenci_google_ce_job_list',
+    'access callback' => 'user_access',
+    'access arguments' => array('test job view'),
+    'file' => 'zenci_google_ce.pages.inc',
+    'type' => MENU_NORMAL_ITEM,  
+  );  
+
+  return $items;
+}
+
+/**
+ * Implements hook_zenci_webhook().
+ */
+function zenci_google_ce_zenci_webhook($method, $data) {
+  switch ($method) {
+    case 'config':
+      /** ZenCI config reguest from ZenCI server.
+       *
+       * @param $data array
+       *   - owner: GitHub organisation or user.
+       *   - repo: GitHub repository name.
+       *   - branch: repository branch that is going to be deployed.
+       *
+       * @return
+       *   array with 'config' value where gitlc.yml file is base64 encoded.
+       */
+       
+      // Create VPS and pass back deploy and testing structure.
+      
+      $config_filepath = backdrop_get_path('module', 'zenci_google_ce') . '/gitlc.yml';
+
+      if ($config = file_get_contents($config_filepath)) {
+        return array(
+          'config' => base64_encode($config),
+        );
+      }
+      break;
+    case 'digitalocean_before':
+      /** ZenCI before test request from ZenCI server.
+       *
+       * @param $data array
+       *   - config: current config structure. Usefull if provided by .gitlc.yml file in GitHub Repository.
+       *     - env_vars: Enviorment values set by script or Gitlc.
+       *   - repo_name: GitHub repository name.
+       *   - repo_owner: GitHub repository owner.
+       *   - branch: repository branch that is going to be deployed.
+       *   - pull_request: PR number or FALSE.
+       *   - action: create,push,opened,synchronize.
+       *   - test: test name.
+       *
+       * @return
+       *   array with 'env_vars'. All enviotment variables will be available via ENV in scripts.
+       */
+       
+       switch($data['action']){
+         case 'create':
+         case 'push':
+         case 'opened':
+         case 'synchronize':
+           // create VPS
+           $prefix = '';
+           if($data['pull_request']){
+             $prefix .= $data['pull_request'] . ".";
+           }
+           $prefix = $data['branch'] . "." . $data['repo_name'] . "." . $data['repo_owner'];
+           $droplet = zenci_google_ce_create_instance($data['test'], $prefix);
+           
+           if($droplet){
+             $record = array(
+               'droplet_id' => $droplet->id,
+               'created' => time(),
+               'owner' => $data['repo_owner'],
+               'repo' => $data['repo_name'],
+               'branch' => $data['branch'],
+               'pr' => (int) $data['pull_request'],
+               'name' => $data['test'],
+             );
+             backdrop_write_record('zenci_google_ce_instances', $record);
+           }
+           
+           $answer = array();
+           $answer['server'] = $droplet->networks->v4[0]->ip_address;
+           return $answer;
+         break;         
+       }
+      break;
+    case 'digitalocean_after':
+      /** ZenCI before test request from ZenCI server.
+       *
+       * @param $data array
+       *   - config: current config structure. Usefull if provided by .gitlc.yml file in GitHub Repository.
+       *     - env_vars: Enviorment values set by script or Gitlc.
+       *   - repo_name: GitHub repository name.
+       *   - repo_owner: GitHub repository owner.
+       *   - branch: repository branch that is going to be deployed.
+       *   - pull_request: PR number or FALSE.
+       *   - action: create,push,.
+       *
+       * @return
+       *   array with 'env_vars'. All enviotment variables will be available via ENV in scripts.
+       */
+       
+       switch($data['action']){
+         case 'create':
+         case 'push':
+         case 'opened':
+         case 'synchronize':
+           // destroy VPS
+         break;         
+       }
+      break;
+      
+  }
+  return $data;
+}
+
+function zenci_google_ce_get_value($env_vars, $variable) {
+  if (isset($env_vars[$variable])) {
+    return $env_vars[$variable];
+  }
+  FALSE;
+}
+
+function zenci_google_ce_get_class() {
+  module_load_include('inc', 'zenci_google_ce', 'zenci_google_ce.class');
+
+  $api_token = zenci_google_ce_get_api_token();
+  $digitalOceanAPI = new digitalOceanAPI();
+  $digitalOceanAPI->setToken($api_token);
+  return $digitalOceanAPI;
+}
+
+function zenci_google_ce_get_api_token() {
+  $config = config('zenci_google_ce.settings');
+  
+  // Use setting.php values if exists.
+  $api_token = settings_get('zenci_google_ce_api_token');
+
+  if (empty($api_token)) {
+    $api_token = $config->get('api_token');
+  }
+  return $api_token;
+}
+
+function zenci_google_ce_create_instance($template_name, $prefix){
+  $template = db_select('zenci_google_ce_templates', 'gh')
+    ->fields('gh')
+    ->condition('name', $template_name)
+    ->execute()
+    ->fetchObject();
+  
+  $digitalOceanAPI = zenci_google_ce_get_class();
+  $image = $digitalOceanAPI->getImage($template->image_id);
+  
+  $digitalOceanAPI->reInitCurl();
+  
+  $settings = array(
+    'name' => $prefix . '.' . $template->name. ".zen.ci",
+    'region' => $image->regions[0],
+    'size' => $template->size,
+    'image' => $template->image_id,    
+  );
+
+  $droplet =  $digitalOceanAPI->createDroplet($settings);
+
+  if($droplet->status != 'active'){
+    while(TRUE){
+      sleep(5);  
+      $digitalOceanAPI->reInitCurl();
+      $data = $digitalOceanAPI->getDroplet($droplet->id);
+      if($data->status == 'active'){
+        sleep(5); //Do extra 5 sec sleep to make sure that Instance is up now. 
+        return $data;
+      }
+    }
+  }else{
+    return $droplet;
+  }
+}

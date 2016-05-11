@@ -1,0 +1,126 @@
+<?php
+/**
+ * @file
+ * Install, update, and uninstall functions for the ZenCI Google Compute Engine module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function zenci_google_ce_schema() {
+
+  $schema['zenci_google_ce_templates'] = array(
+    'description' => '{zenci_google_ce} templates.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Primary Key: Unique repository ID.',
+        'type' => 'serial',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'Test name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'machine_type' => array(
+        'description' => 'The machine type resource to use for this instance.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'image_name' => array(
+        'description' => 'Image name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'unique keys' => array(
+      'id' => array('id'),
+      'name' => array('name'),
+    ),
+  );
+  
+  $schema['zenci_google_ce_instances'] = array(
+    'description' => '{zenci_webhook} repository config.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'Primary Key: Unique repository ID.',
+        'type' => 'serial',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'A unique name for each instance.',
+        'type' => 'varchar',
+        'length' => 63,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'A Unix timestamp indicating when the instance was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'owner' => array(
+        'description' => 'Repository owner.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'repo' => array(
+        'description' => 'Repository name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'branch' => array(
+        'description' => 'Github branch name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'pr' => array(
+        'description' => 'If test job run for PR - it is a PR number here.',
+        'type' => 'varchar',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'template' => array(
+        'description' => 'Template name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'results' => array(
+        'description' => 'Job results data. Contain serialized array with url to test results and test summary (FAILED, PASSED, total tasks etc)',
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),      
+      
+    ),
+    'indexes' => array(
+      'owner_name' => array('owner', 'repo'),
+      'template' => array('template'),
+    ),
+    'unique keys' => array(
+      'id' => array('id'),
+      'name' => array('name'),
+    ),
+  );
+
+  return $schema;
+}
