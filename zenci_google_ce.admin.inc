@@ -25,7 +25,7 @@ function zenci_google_ce_settings() {
   $private_key = settings_get('zenci_google_ce_private_key');
   
   $form['private_key'] = array(
-    '#type' => 'textfield',
+    '#type' => 'textarea',
     '#title' => t('Private Key'),
     '#default_value' => !empty($private_key) ? $private_key : $config->get('private_key'),
     '#description' => t('You need to get Service Account Key here: https://console.cloud.google.com/iam-admin/serviceaccounts/serviceaccounts-zero'),
