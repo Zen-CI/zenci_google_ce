@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * DigitalOcean API wrapper class definition.
+ * GoogleComputeEngine API wrapper class definition.
  */
 
 
@@ -59,6 +59,20 @@ class GoogleComputeEngineAPI {
   protected $error_message = '';
 
   /**
+   * Project ID.
+   *
+   * @var string
+   */
+  protected $project_id;
+
+  /**
+   * Private Key.
+   *
+   * @var string
+   */
+  protected $private_key;
+
+  /**
    * Constructor.
    */
   public function __construct() {
@@ -87,10 +101,30 @@ class GoogleComputeEngineAPI {
   }
 
   /**
-   * Set token for DigitalOcean API.
+   * Set Project ID value. False by default.
+   *
+   * @param $project_id
+   *   Project ID to retrive TOKEN for GoogleComputeEngine API.
+   */
+  public function setProjectID($project_id) {
+    $this->project_id = $project_id;
+  }
+
+  /**
+   * Set PrivateKey value. False by default.
+   *
+   * @param $private_key
+   *   PrivateKey to retrive TOKEN for GoogleComputeEngine API.
+   */
+  public function setPrivateKey($private_key) {
+    $this->private_key = $private_key;
+  }
+
+  /**
+   * Set token for GoogleComputeEngine API.
    *
    * @param $token
-   *   Token to access DigitalOcean API.
+   *   Token to access GoogleComputeEngine API.
    */
   public function setToken($token = '') {
     $this->token = $token;
@@ -100,7 +134,7 @@ class GoogleComputeEngineAPI {
    * Get store token.
    *
    * @return
-   *   A string value. Stored token for DigitalOcean API access.
+   *   A string value. Stored token for GoogleComputeEngine API access.
    */
   public function getToken() {
     return $this->token;
@@ -110,7 +144,7 @@ class GoogleComputeEngineAPI {
    * Determine if curl request has been falen with error.
    *
    * @return boolean
-   *   TRUE or FALSE based on answer from DigitalOcean API.
+   *   TRUE or FALSE based on answer from GoogleComputeEngine API.
    */
   public function isError() {
     return $this->curl->curlError or $this->curl->error;
@@ -152,7 +186,7 @@ class GoogleComputeEngineAPI {
   }
 
   /**
-   * Get DigitalOcean APi Error message if error happen.
+   * Get GoogleComputeEngine API Error message if error happen.
    *
    * @return
    *   String with error message.
@@ -202,10 +236,10 @@ class GoogleComputeEngineAPI {
   }
 
   /**
-   * Perform GET request to DigitalOcean API and return answer.
+   * Perform GET request to GoogleComputeEngine API and return answer.
    *
    * @param $command
-   *   String value. DigitalOcean API url with tokens Like :owner, :repo and ect.
+   *   String value. GoogleComputeEngine API url with tokens Like :owner, :repo and ect.
    * @param $params array
    *   Values for request and tokens for request url. Like :owner, :repo, :id
    *   and etc.
@@ -227,10 +261,10 @@ class GoogleComputeEngineAPI {
   }
 
   /**
-   * Perform PUT request to DigitalOcean API and return answer.
+   * Perform PUT request to GoogleComputeEngine API and return answer.
    *
    * @param $command
-   *   String value. DigitalOcean API url with tokens Like :owner, :repo and ect.
+   *   String value. GoogleComputeEngine API url with tokens Like :owner, :repo and ect.
    * @param $params array
    *   Values for request and tokens for request url. Like :owner, :repo, :id
    *   and etc.
@@ -252,10 +286,10 @@ class GoogleComputeEngineAPI {
   }
 
   /**
-   * Perform POST request to DigitalOcean API and return answer.
+   * Perform POST request to GoogleComputeEngine API and return answer.
    *
    * @param $command
-   *   String value. DigitalOcean API url with tokens Like :owner, :repo and ect.
+   *   String value. GoogleComputeEngine API url with tokens Like :owner, :repo and ect.
    * @param $params array
    *   Values for request and tokens for request url. Like :owner, :repo, :id
    *   and etc.
@@ -275,10 +309,10 @@ class GoogleComputeEngineAPI {
   }
 
   /**
-   * Perform DELETE request to DigitalOcean API and return answer.
+   * Perform DELETE request to GoogleComputeEngine API and return answer.
    *
    * @param $command
-   *   String value. DigitalOcean API url with tokens Like :owner, :repo and ect.
+   *   String value. GoogleComputeEngine API url with tokens Like :owner, :repo and ect.
    * @param $params array
    *   Values for request and tokens for request url. Like :owner, :repo, :id
    *   and etc.
@@ -303,7 +337,7 @@ class GoogleComputeEngineAPI {
    * Replace tokens with values in request url.
    *
    * @param $command
-   *   String value. DigitalOcean API url with tokens Like :owner, :repo and ect.
+   *   String value. GoogleComputeEngine API url with tokens Like :owner, :repo and ect.
    * @param $params array
    *   Values for request and tokens for request url. Like :owner, :repo, :id
    *   and etc.
