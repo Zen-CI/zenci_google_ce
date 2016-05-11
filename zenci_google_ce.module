@@ -7,7 +7,7 @@
  
  // URL ZenCI GoogleComputeEngine API.
 define('ZENCI_GOOGLE_OAUTH_TOKEN_URI', 'https://www.googleapis.com/oauth2/v4/token');
- 
+define('ZENCI_GOOGLE_CE_SCOPE', 'https://www.googleapis.com/auth/compute');
 /**
  * Implements hook_config_info().
  */
