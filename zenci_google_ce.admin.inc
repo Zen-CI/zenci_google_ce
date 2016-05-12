@@ -155,20 +155,46 @@ function zenci_google_ce_template($form, &$form_state) {
     '#required' => TRUE,
   );
   
+  $public_projects = array(
+    'centos-cloud',
+    'google-containers',
+    'coreos-cloud',
+    'debian-cloud',
+    'rhel-cloud',
+    'opensuse-cloud',
+    'suse-cloud',
+    'ubuntu-os-cloud',
+    'windows-cloud',
+  );
 
-  $private_images = $GoogleComputeEngineAPI->getPublicImages('centos-cloud');
+  foreach($public_projects as $public_project) {
+    $private_images[$public_project] = $GoogleComputeEngineAPI->getPublicImages($public_project);
+  }
+
+  $private_images['private'] = $GoogleComputeEngineAPI->getImages();
 
   backdrop_set_message('<pre>' . print_r($private_images, TRUE) . '</pre>');
 
+  $image_options = array();
+  foreach($private_images as $project => $images) {
+    foreach($images as $image){
+      if(isset($image->deprecated)){
+        continue;
+      }
+      $image_options[$project . ":" . $image->name] = $image->name;
+    }
+  }
+
+  $form['image'] = array(
+    '#type' => 'select',
+    '#title' => t('Image'),
+    '#options' => $image_options,
+    '#description' => t('Please select image.'),
+  );
+  
   return $form;
 
   
-  $form_state['private_images'] = $private_images;
-  
-  $image_options = array();
-  foreach($private_images as $image){
-    $image_options[$image->id] = $image->name;
-  }
   
   $digitalOceanAPI->reInitCurl();
   
@@ -185,12 +211,7 @@ function zenci_google_ce_template($form, &$form_state) {
     '#description' => t('This is a test task name.'),
     '#required' => TRUE,
   );
-  $form['image'] = array(
-    '#type' => 'select',
-    '#title' => t('Image'),
-    '#options' => $image_options,
-    '#description' => t('Please select image.'),
-  );
+
 
   $form['size'] = array(
     '#type' => 'select',
