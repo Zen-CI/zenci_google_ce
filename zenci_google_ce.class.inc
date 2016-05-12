@@ -221,6 +221,8 @@ class GoogleComputeEngineAPI {
     //$this->curl->response;
     
     backdrop_set_message('<pre>' . print_r($this->curl->response, TRUE) . '</pre>');
+    backdrop_set_message('<pre>' . print_r($this->testingGetHeaders(), TRUE) . '</pre>');
+    
   }
   
   /**
