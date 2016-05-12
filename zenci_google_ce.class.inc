@@ -223,12 +223,13 @@ class GoogleComputeEngineAPI {
     $curl->setHeader('Accept', '*/*');
     
     $curl->post(ZENCI_GOOGLE_OAUTH_TOKEN_URI, $params);
-    //$this->curl->response;
     
-    backdrop_set_message('<pre>' . print_r($claim, TRUE) . '</pre>');
-    backdrop_set_message('<pre>' . print_r($curl->response, TRUE) . '</pre>');
-    backdrop_set_message('<pre>' . print_r($curl, TRUE) . '</pre>');
-    
+    if ($this->isError()) {
+      throw new Exception('GoogleComputeEngineAPI: ' . $this->curl->curlErrorCode . ' ' . $this->curl->response->message);
+    }
+    else{
+      $this->setToken($curl->response->access_token, $time + $curl->response->expires_in);
+    }
   }
   
   /**
