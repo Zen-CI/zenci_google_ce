@@ -107,8 +107,10 @@ function zenci_google_ce_templates() {
   foreach ($templates as $template) {
     $row = array();
     $row[] = array('data' => $template->name);
-    $row[] = array('data' => $template->size);
+    $row[] = array('data' => $template->machine_type);
     $row[] = array('data' => $template->image_name);
+    $row[] = array('data' => $template->disk_type);
+    $row[] = array('data' => $template->disk_size);
     $links['delete'] = array(
       'title' => t('Delete'),
       'href' => "admin/config/system/google_ce/" . $template->id . "/delete",
@@ -131,7 +133,7 @@ function zenci_google_ce_templates() {
     ),
     '#attributes' => array('class' => array('button-primary')),
   );
-  $header = array(t('Name'), t('Size'), t('Image'), t('Operations'));
+  $header = array(t('Name'), t('Machine type'), t('Image'), t('Disk type'), t('Disk size'),   t('Operations'));
 
   $output['table'] = array(
     '#theme' => 'table__zenci_google_ce_templates',
