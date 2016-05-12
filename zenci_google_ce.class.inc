@@ -217,7 +217,7 @@ class GoogleComputeEngineAPI {
       'assertion' => $request . '.' . $signature_base_encoded,
     );
     
-    $this->curl->get(ZENCI_GOOGLE_OAUTH_TOKEN_URI, $params);
+    $this->curl->post(ZENCI_GOOGLE_OAUTH_TOKEN_URI, $params);
     //$this->curl->response;
     
     backdrop_set_message('<pre>' . print_r($this->curl->response, TRUE) . '</pre>');
