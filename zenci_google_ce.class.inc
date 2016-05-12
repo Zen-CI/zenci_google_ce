@@ -705,8 +705,6 @@ backdrop_set_message('<pre>' . print_r($zones,TRUE). '</pre>');
     $instance_settings->serviceAccounts = array($serviceAccount);
 
     backdrop_set_message('<pre>' . json_encode($instance_settings). '</pre>');
-    
-    $this->setDebug(TRUE);
       
     $answer =  $this->postRequest('zones/' . $zone . '/instances', (array)$instance_settings);
 
