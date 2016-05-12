@@ -668,9 +668,9 @@ class GoogleComputeEngineAPI {
     $disk->mode = 'READ_WRITE';
     $disk->autoDelete = TRUE;
     $disk->deviceName = 'test.' . $template->name. ".zen.ci";
-    $disk->initializeParams->sourceImage = 'projects/' . $this->setProjectID() .'/global/images/php53';
+    $disk->initializeParams->sourceImage = 'projects/' . $this->project_id .'/global/images/php53';
     
-    $disk->initializeParams->diskType = 'projects/' . $this->setProjectID() .'/zones/' . $zone. '/diskTypes/' . $template->disk_type;
+    $disk->initializeParams->diskType = 'projects/' . $this->project_id .'/zones/' . $zone. '/diskTypes/' . $template->disk_type;
     $disk->initializeParams->diskSizeGb = $template->disk_size;
     
     $network_accessConfigs = new stdClass();
@@ -679,18 +679,18 @@ class GoogleComputeEngineAPI {
     $network_accessConfigs->type = "ONE_TO_ONE_NAT";
          
     $network = new stdClass();
-    $network->network = "projects/" . $this->setProjectID() . "/global/networks/default";
+    $network->network = "projects/" . $this->project_id . "/global/networks/default";
     $network->accessConfigs = array($network_accessConfigs);
     
     $serviceAccount = new stdClass();
     
-    $serviceAccount->email = $this->setProjectID() . "@" . ZENCI_GOOGLE_CE_PROJECT_DOMAIN;
+    $serviceAccount->email = $this->project_id . "@" . ZENCI_GOOGLE_CE_PROJECT_DOMAIN;
     $serviceAccount->scopes = array(ZENCI_GOOGLE_CE_INSTANCE_SCOPE);
     
     $instance_settings = new stdClass();
     $instance_settings->name = 'test.' . $template->name. ".zen.ci";
-    $instance_settings->zone = "projects/" . $this->setProjectID() . "/zones/" . $zone;
-    $instance_settings->machineType = "projects/" . $this->setProjectID() . "/zones/" . $zone ."/machineTypes/" . $template->machine_type;
+    $instance_settings->zone = "projects/" . $this->project_id . "/zones/" . $zone;
+    $instance_settings->machineType = "projects/" . $this->project_id . "/zones/" . $zone ."/machineTypes/" . $template->machine_type;
     $instance_settings->metadata = $metadata;
     $instance_settings->tags = $tags;
     $instance_settings->disks = array($disk);
