@@ -690,7 +690,7 @@ class GoogleComputeEngineAPI {
     $instance_settings = new stdClass();
     $instance_settings->name = 'test.' . $template->name. ".zen.ci";
     $instance_settings->zone = "projects/" . $this->setProjectID() . "/zones/" . $zone;
-    $instance_settings->machineType = "projects/" . $this->setProjectID() . "/zones/" . $zone ."/machineTypes/" . $template['machine_type'];
+    $instance_settings->machineType = "projects/" . $this->setProjectID() . "/zones/" . $zone ."/machineTypes/" . $template->machine_type;
     $instance_settings->metadata = $metadata;
     $instance_settings->tags = $tags;
     $instance_settings->disks = array($disk);
