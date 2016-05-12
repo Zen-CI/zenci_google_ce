@@ -208,7 +208,7 @@ function zenci_google_ce_template($form, &$form_state) {
     'pd-standard' => t('Standard persistent disk'),
   );
 
-  $form['disk'] = array(
+  $form['disk_type'] = array(
     '#type' => 'select',
     '#title' => t('Disk type'),
     '#options' => $disk_options,
