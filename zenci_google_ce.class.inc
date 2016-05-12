@@ -708,8 +708,13 @@ backdrop_set_message('<pre>' . print_r($zones,TRUE). '</pre>');
       
     $answer =  $this->postRequest('zones/' . $zone . '/instances', (array)$instance_settings);
 
-    $answer->zone = $zone;
-    $answer->instance_name = 'test-' . $template->name. "-zen-ci";
+
+    sleep(1);
+    $this->reInitCurl();
+    $instance_new = $this->getInstance('test-' . $template->name. "-zen-ci", $zone);
+
+    backdrop_set_message('<pre>' . print_r($instance_new, true). '</pre>');
+
     return $answer;
 
   }
