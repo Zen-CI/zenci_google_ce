@@ -147,7 +147,16 @@ function zenci_google_ce_templates() {
  */
 function zenci_google_ce_template($form, &$form_state) {
   
-  $digitalOceanAPI = zenci_google_ce_get_class();
+  $GoogleComputeEngineAPI = zenci_google_ce_get_class();
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#description' => t('This is a test task name.'),
+    '#required' => TRUE,
+  );
+  
+  return $form;
+
   $images = $digitalOceanAPI->getImages(TRUE);
   
   $form_state['images'] = $images;
