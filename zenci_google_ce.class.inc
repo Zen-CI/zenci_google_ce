@@ -668,8 +668,7 @@ class GoogleComputeEngineAPI {
     $disk->mode = 'READ_WRITE';
     $disk->autoDelete = TRUE;
     $disk->deviceName = 'test.' . $template->name. ".zen.ci";
-    
-    $instance_settings->initializeParams = new stdClass();;
+    $disk->initializeParams = new stdClass();;
     $disk->initializeParams->sourceImage = 'projects/' . $this->project_id .'/global/images/php53';
     
     $disk->initializeParams->diskType = 'projects/' . $this->project_id .'/zones/' . $zone. '/diskTypes/' . $template->disk_type;
