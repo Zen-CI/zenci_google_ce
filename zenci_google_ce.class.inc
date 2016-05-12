@@ -618,8 +618,8 @@ class GoogleComputeEngineAPI {
    *
    */
   public function getInstance($zone, $name) {
-    $this->setDebug(TRUE);
-    $answer = $this->getRequest('zones/' . $zone . '/' . $name);
+//    $this->setDebug(TRUE);
+    $answer = $this->getRequest('zones/' . $zone . '/instances/' . $name);
     return $answer;
   }
   
