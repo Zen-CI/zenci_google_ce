@@ -7,6 +7,7 @@
 // URL ZenCI GoogleComputeEngine API.
 define('ZENCI_GOOGLE_OAUTH_TOKEN_URI', 'https://www.googleapis.com/oauth2/v4/token');
 define('ZENCI_GOOGLE_CE_SCOPE', 'https://www.googleapis.com/auth/compute');
+define('ZENCI_GOOGLE_CE_PROJECT_DOMAIN', 'appspot.gserviceaccount.com');
 
 use \Curl\Curl;
 
@@ -198,7 +199,7 @@ class GoogleComputeEngineAPI {
     $time = time();
     
     $claim = array(
-      'iss' => $this->project_id,
+      'iss' => $this->project_id . '@' . ZENCI_GOOGLE_CE_PROJECT_DOMAIN,
       'scope' => ZENCI_GOOGLE_CE_SCOPE,
       'aud' => ZENCI_GOOGLE_OAUTH_TOKEN_URI,
       'exp' => $time + 3600,
