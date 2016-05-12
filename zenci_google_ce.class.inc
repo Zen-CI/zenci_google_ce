@@ -538,8 +538,7 @@ class GoogleComputeEngineAPI {
    * https://cloud.google.com/compute/docs/reference/latest/machineTypes/aggregatedList
    *
    * @return
-   *   Return images information or FALSE if there is no images or no
-   *   access.
+   *   Return machine types array.
    *
    */
   public function getMachineTypes($zone = '') {
@@ -562,6 +561,31 @@ class GoogleComputeEngineAPI {
     return $answer;
   }
   
+  /**
+   * Get zones that support provided machineType.
+   * https://cloud.google.com/compute/docs/reference/latest/machineTypes/aggregatedList
+   *
+   * @return
+   *   Return 1 level array of zones.
+   *
+   */
+  public function getZonesByMachineType($machine_type) {
+    
+    $params = array(
+      'filter' => 'name eq ' . $machine_type,
+    );
+
+    $answer = $this->getRequest('aggregated/machineTypes', $params);
+    if(isset($answer['items'])){
+      $zones = array();
+      foreach($answer['items'] as $zone_name => $value){
+        $zones[] = $zone_name;
+      }
+      return $zones;
+    }
+    return $answer;
+  }
+
   /**
    * Create droplet.
    * https://developers.digitalocean.com/documentation/v2/#create-a-new-droplet
