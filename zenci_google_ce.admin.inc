@@ -352,23 +352,11 @@ function zenci_google_ce_instance_submit($form, &$form_state) {
 
   $GoogleComputeEngineAPI = zenci_google_ce_get_class();
   
-  $zones = $GoogleComputeEngineAPI->getZonesByMachineType($template->machine_type);
+  $instance =  $GoogleComputeEngineAPI->createInstance($template);
+  backdrop_set_message('<pre>' . print_r($instance,true). '</pre>');
   
-  backdrop_set_message('<pre>' . print_r($zones,true). '</pre>');
   return;
   
-  $GoogleComputeEngineAPI->reInitCurl();
-
-  $instance_settings = array(
-    'name' => 'test.' . $template->name. ".zen.ci",
-    'region' => $image->regions[0],
-    'size' => $template->size,
-    'image' => $template->image_id,
-  );
-
-  $instance =  $digitalOceanAPI->createInstance($instance_settings);
-  backdrop_set_message('<pre>' . print_r($droplet,true). '</pre>');
-
   if($droplet->status != 'active'){
     while(TRUE){
       sleep(5);

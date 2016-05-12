@@ -9,6 +9,7 @@ define('ZENCI_GOOGLE_OAUTH_TOKEN_URI', 'https://www.googleapis.com/oauth2/v4/tok
 define('ZENCI_GOOGLE_CE_SCOPE', 'https://www.googleapis.com/auth/compute');
 define('ZENCI_GOOGLE_CE_PROJECT_DOMAIN', 'appspot.gserviceaccount.com');
 define('ZENCI_GOOGLE_CE_API_URI', 'https://www.googleapis.com/compute/v1/projects');
+define('ZENCI_GOOGLE_CE_INSTANCE_SCOPE', 'https://www.googleapis.com/auth/cloud-platform');
 
 use \Curl\Curl;
 
@@ -91,7 +92,7 @@ class GoogleComputeEngineAPI {
     $this->reInitCurl();
     $this->setDebug();
     $this->private_key = zenci_google_ce_get_private_key();
-    $this->project_id = zenci_google_ce_get_project_id();    
+    $this->project_id = zenci_google_ce_get_project_id();
     $config = config('zenci_google_ce.settings');
     $token = $config->get('token');
     if($token) {
@@ -625,7 +626,85 @@ class GoogleComputeEngineAPI {
     return $answer;
   }
   
-  public function createDroplet($settings) {
+  /**
+   * Create Instance.
+   * https://cloud.google.com/compute/docs/reference/latest/instances/insert
+   *
+   * @param $templare object
+   *   An array of settings for droplet
+   *     - name: The name for template. REQUIRED
+   *     - machine_type: The machine type.  REQUIRED
+   *     - image_name: The image name.  REQUIRED
+   *     - disk_type: The disk type.  REQUIRED
+   *     - disk_size: Size in GB.
+   *
+   * @return
+   *   Return Instance information or FALSE if there is no access.
+   *
+   */
+  public function createInstance($template) {
+    
+    $zones = $this->getZonesByMachineType($template->machine_type);
+    
+    $zone = $zones[rand(0,count($zones) - 1)];
+    $this->reInitCurl();
+    
+    $key = new stdClass();
+    $key->key = "ssh-keys";
+    $key->value = "root:ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAtU034MgQ7NRqM1neyR/VzJuEfH75klZjXSjGUHcRbVnxBP6fsf/tPRT6cmYMqkZtWZfl3HNV5+x2Wb0me4lww2ZFWnN/chyYNh6uRmzxf+fgrlCvjY1a71TVv2AjILM/6gK68oc0575WEhEs0nEDi8Mj3kjPIwmBQa2H+Ul9gqjCnJchVtfNKDf8vK4Nf2oTemzq5U1AIJu+6ha/EY6gCin1U2OOKZHE8YoG7QS980YQWqlk+9oZueXMQuOc1SZDr8MJqbu+5jZpW26dsYaeC+fO7LYT+vitOWIe0XjpTQkaGesfNzkqfg4nPZeSsX4wtyVabdbhSK0JZPEErd6PCQ== root@coral.vps-private.net";
+    
+    $metadata = new stdClass();
+    $metadata->items[] = $key;
+    
+    $tags = new stdClass();  
+    
+    $tags->items[] = 'http-server';
+    $tags->items[] = 'https-server';
+    
+    $disk = new stdClass();
+    
+    $disk->type = 'PERSISTENT';
+    $disk->boot = TRUE;
+    $disk->mode = 'READ_WRITE';
+    $disk->autoDelete = TRUE;
+    $disk->deviceName = 'test.' . $template->name. ".zen.ci";
+    $disk->initializeParams->sourceImage = 'projects/' . $this->setProjectID() .'/global/images/php53';
+    
+    $disk->initializeParams->diskType = 'projects/' . $this->setProjectID() .'/zones/' . $zone. '/diskTypes/' . $template->disk_type;
+    $disk->initializeParams->diskSizeGb = $template->disk_size;
+    
+    $network_accessConfigs = new stdClass();
+
+    $network_accessConfigs->name = "External NAT";
+    $network_accessConfigs->type = "ONE_TO_ONE_NAT";
+         
+    $network = new stdClass();
+    $network->network = "projects/" . $this->setProjectID() . "/global/networks/default";
+    $network->accessConfigs = array($network_accessConfigs);
+    
+    $serviceAccount = new stdClass();
+    
+    $serviceAccount->email = $this->setProjectID() . "@" . ZENCI_GOOGLE_CE_PROJECT_DOMAIN;
+    $serviceAccount->scopes = array(ZENCI_GOOGLE_CE_INSTANCE_SCOPE);
+    
+    $instance_settings = new stdClass();
+    $instance_settings->name = 'test.' . $template->name. ".zen.ci";
+    $instance_settings->zone = "projects/" . $this->setProjectID() . "/zones/" . $zone;
+    $instance_settings->machineType = "projects/" . $this->setProjectID() . "/zones/" . $zone ."/machineTypes/" . $template['machine_type'];
+    $instance_settings->metadata = $metadata;
+    $instance_settings->tags = $tags;
+    $instance_settings->disks = array($disk);
+    $instance_settings->canIpForward = FALSE;
+    $instance_settings->networkInterfaces = array($network);
+    $instance_settings->description = 'ZenCI testing eviorment';
+    $instance_settings->scheduling->preemptible = TRUE;
+    $instance_settings->scheduling->onHostMaintenance = "TERMINATE";
+    $instance_settings->scheduling->automaticRestart = FALSE;
+    
+    $instance_settings->serviceAccounts = array($serviceAccount);
+    
+    return $instance_settings;
+  
     $answer =  $this->postRequest('droplets', $settings);
     if(isset($answer['droplet'])){
       return $answer['droplet'];
