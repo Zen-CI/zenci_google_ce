@@ -167,11 +167,12 @@ function zenci_google_ce_template($form, &$form_state) {
     'windows-cloud',
   );
 
+  $private_images['private'] = $GoogleComputeEngineAPI->getImages();
+
   foreach($public_projects as $public_project) {
     $private_images[$public_project] = $GoogleComputeEngineAPI->getPublicImages($public_project);
   }
 
-  $private_images['private'] = $GoogleComputeEngineAPI->getImages();
 
   $image_options = array();
   foreach($private_images as $project => $images) {
