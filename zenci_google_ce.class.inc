@@ -225,6 +225,7 @@ class GoogleComputeEngineAPI {
     $curl->post(ZENCI_GOOGLE_OAUTH_TOKEN_URI, $params);
     //$this->curl->response;
     
+    backdrop_set_message('<pre>' . print_r($claim, TRUE) . '</pre>');
     backdrop_set_message('<pre>' . print_r($curl->response, TRUE) . '</pre>');
     backdrop_set_message('<pre>' . print_r($curl, TRUE) . '</pre>');
     

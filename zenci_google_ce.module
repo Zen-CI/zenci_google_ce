@@ -250,7 +250,7 @@ function zenci_google_ce_get_project_id() {
   $project_id = settings_get('zenci_google_ce_project_id');
 
   if (empty($project_id)) {
-    $private_key = $config->get('project_id');  
+    $project_id = $config->get('project_id');  
   }
 
   return $project_id;
