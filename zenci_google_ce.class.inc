@@ -8,6 +8,7 @@
 define('ZENCI_GOOGLE_OAUTH_TOKEN_URI', 'https://www.googleapis.com/oauth2/v4/token');
 define('ZENCI_GOOGLE_CE_SCOPE', 'https://www.googleapis.com/auth/compute');
 define('ZENCI_GOOGLE_CE_PROJECT_DOMAIN', 'appspot.gserviceaccount.com');
+define('ZENCI_GOOGLE_CE_API_URI', 'https://www.googleapis.com/compute/v1/projects');
 
 use \Curl\Curl;
 
@@ -358,7 +359,7 @@ class GoogleComputeEngineAPI {
       $this->curl->setHeader('Authorization', 'Bearer ' . $this->getToken());
     }
 
-    $this->curl->get(ZENCI_DIGITALOCEAN_API_URI . '/' . $command, $params);
+    $this->curl->get(ZENCI_GOOGLE_CE_API_URI . '/' . $this->project_id . '/' . $command, $params);
     $response = $this->getResponse();
     return $response;
   }
@@ -383,7 +384,7 @@ class GoogleComputeEngineAPI {
       $this->curl->setHeader('Token', $this->getToken());
     }
 
-    $this->curl->put(ZENCI_DIGITALOCEAN_API_URI . '/' . $command, $params);
+    $this->curl->put(ZENCI_GOOGLE_CE_API_URI . '/' . $command, $params);
     $response = $this->getResponse();
     return $response;
   }
@@ -406,7 +407,7 @@ class GoogleComputeEngineAPI {
     if ($this->getToken()) {
       $this->curl->setHeader('Authorization', 'Bearer ' . $this->getToken());
     }
-    $this->curl->post(ZENCI_DIGITALOCEAN_API_URI . '/' . $command, $params);
+    $this->curl->post(ZENCI_GOOGLE_CE_API_URI . '/' . $command, $params);
     $response = $this->getResponse();
     return $response;
   }
@@ -431,7 +432,7 @@ class GoogleComputeEngineAPI {
       $this->curl->setHeader('Authorization', 'Bearer ' . $this->getToken());
     }
 
-    $this->curl->delete(ZENCI_DIGITALOCEAN_API_URI . '/' . $command, $params);
+    $this->curl->delete(ZENCI_GOOGLE_CE_API_URI . '/' . $command, $params);
     $response = $this->getResponse();
     return $response;
   }
@@ -473,21 +474,38 @@ class GoogleComputeEngineAPI {
 
   /**
    * Get Images information.
-   * https://developers.digitalocean.com/documentation/v2/#images
+   * https://cloud.google.com/compute/docs/reference/latest/images/list
    *
    * @return
    *   Return images information or FALSE if there is no images or no
    *   access.
    *
    */
-  public function getImages($private = FALSE) {
-    $params = array();
-    if($private){
-      $params['private'] = 'true';
-    };
-    $answer = $this->getRequest('images', $params);
-    if(isset($answer['images'])){
-      return $answer['images'];
+  public function getImages() {
+    $answer = $this->getRequest('global/images');
+    if(isset($answer['items'])){
+      return $answer['items'];
+    }
+    return $answer;
+  }
+  
+   /**
+   * Get Images information.
+   * https://cloud.google.com/compute/docs/reference/latest/images/list
+   *
+   * @return
+   *   Return images information or FALSE if there is no images or no
+   *   access.
+   *
+   */
+  public function getPublicImages($project) {
+    $current_project_id = $this->project_id;
+    $this->project_id = $project;
+    $answer = $this->getRequest('global/images');
+    $this->project_id = $current_project_id;
+    
+    if(isset($answer['items'])){
+      return $answer['items'];
     }
     return $answer;
   }

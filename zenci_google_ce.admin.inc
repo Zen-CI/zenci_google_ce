@@ -155,14 +155,18 @@ function zenci_google_ce_template($form, &$form_state) {
     '#required' => TRUE,
   );
   
+
+  $private_images = $GoogleComputeEngineAPI->getPublicImages('centos-cloud');
+
+  backdrop_set_message('<pre>' . print_r($private_images, TRUE) . '</pre>');
+
   return $form;
 
-  $images = $digitalOceanAPI->getImages(TRUE);
   
-  $form_state['images'] = $images;
+  $form_state['private_images'] = $private_images;
   
   $image_options = array();
-  foreach($images as $image){
+  foreach($private_images as $image){
     $image_options[$image->id] = $image->name;
   }
   
