@@ -217,11 +217,16 @@ class GoogleComputeEngineAPI {
       'assertion' => $request . '.' . $signature_base_encoded,
     );
     
-    $this->curl->post(ZENCI_GOOGLE_OAUTH_TOKEN_URI, $params);
+    $curl = new Curl();
+    $curl->setHeader('Content-Type', 'application/x-www-form-urlencoded');
+    $curl->setUserAgent('Backdrop CMS ZenCI GoogleComputeEngine API module');
+    $curl->setHeader('Accept', '*/*');
+    
+    $curl->post(ZENCI_GOOGLE_OAUTH_TOKEN_URI, $params);
     //$this->curl->response;
     
-    backdrop_set_message('<pre>' . print_r($this->curl->response, TRUE) . '</pre>');
-    backdrop_set_message('<pre>' . print_r($this->testingGetHeaders(), TRUE) . '</pre>');
+    backdrop_set_message('<pre>' . print_r($curl->response, TRUE) . '</pre>');
+    backdrop_set_message('<pre>' . print_r($curl, TRUE) . '</pre>');
     
   }
   
