@@ -4,6 +4,9 @@
  * GoogleComputeEngine API wrapper class definition.
  */
 
+// URL ZenCI GoogleComputeEngine API.
+define('ZENCI_GOOGLE_OAUTH_TOKEN_URI', 'https://www.googleapis.com/oauth2/v4/token');
+define('ZENCI_GOOGLE_CE_SCOPE', 'https://www.googleapis.com/auth/compute');
 
 use \Curl\Curl;
 
@@ -29,6 +32,13 @@ class GoogleComputeEngineAPI {
    * @var string
    */
   protected $token = '';
+  
+  /**
+   * Token expire time.
+   *
+   * @var string
+   */
+  protected $token_expire = '';
 
   /**
    * Organisation or User name.
@@ -78,6 +88,16 @@ class GoogleComputeEngineAPI {
   public function __construct() {
     $this->reInitCurl();
     $this->setDebug();
+    $this->private_key = zenci_google_ce_get_private_key();
+    $this->project_id = zenci_google_ce_get_project_id();    
+    $config = config('zenci_google_ce.settings');
+    $token = $config->get('token');
+    if($token) {
+      $this->token = $token;
+      $this->token_expire = $config->get('token_expire');    
+    }else{
+      $this->getToken();
+    }
   }
 
   /**
@@ -125,9 +145,16 @@ class GoogleComputeEngineAPI {
    *
    * @param $token
    *   Token to access GoogleComputeEngine API.
+   * @param $expire_timestamp
+   *   Expiration Timestamp.
    */
-  public function setToken($token = '') {
+  private function setToken($token, $expire) {
     $this->token = $token;
+    $this->token_expire = $expire;    
+    $config = config('zenci_google_ce.settings');
+    $config->set('token', $token);
+    $config->set('token_expire', $expire);
+    $config->save();
   }
 
   /**
@@ -137,7 +164,73 @@ class GoogleComputeEngineAPI {
    *   A string value. Stored token for GoogleComputeEngine API access.
    */
   public function getToken() {
+    
+    if(empty($this->token) or $this->token_expire < time() + 300 ) {
+      
+      // Check file first. Maybe it is updated already.
+      $config = config('zenci_google_ce.settings');
+      $token = $config->get('token');
+      $token_expire = $config->get('token_expire');
+      
+      if($token && $token_expire > time() + 300 ) {
+        $this->token = $token;
+        $this->token_expire = $token_expire;
+      }
+      else{
+        // Time to get new token.
+        $this->updateToken();
+      }
+    }
     return $this->token;
+  }
+  
+  /**
+   * Update Token.
+   */
+  private function updateToken() {
+    $header = array(
+      'alg' => 'RS256',
+      'typ' => 'JWT',
+    );
+    
+    $header_json = json_encode($header);
+    
+    $time = time();
+    
+    $claim = array(
+      'iss' => $this->project_id,
+      'scope' => ZENCI_GOOGLE_CE_SCOPE,
+      'aud' => ZENCI_GOOGLE_OAUTH_TOKEN_URI,
+      'exp' => $time + 3600,
+      'iat' => $time,
+    );
+    
+    $claim_json = json_encode($claim);
+    
+    $request = base64_encode($header_json) . '.' . base64_encode($claim_json);
+    $signature_base_encoded = $this->signRequest($request);
+    
+    $assertion = $request . '.' . $signature_base_encoded;
+    
+    $params = array(
+      'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      'assertion' => $request . '.' . $signature_base_encoded,
+    );
+    
+    $this->curl->get(ZENCI_GOOGLE_OAUTH_TOKEN_URI, $params);
+    //$this->curl->response;
+    
+    backdrop_set_message('<pre>' . print_r($this->curl->response, TRUE) . '</pre>');
+  }
+  
+  /**
+   * Update Token.
+   */
+  private function signRequest($reguest) {
+    $signature = null;
+    openssl_sign($reguest, $signature, $this->private_key, "SHA256");
+    $signature = rtrim(strtr(base64_encode($signature), '+/', '-_'), '=');
+    return $signature;
   }
 
   /**
