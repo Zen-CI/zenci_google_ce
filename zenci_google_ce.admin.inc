@@ -320,7 +320,7 @@ function zenci_google_ce_instance($form, &$form_state) {
 
   $options = array();
   foreach ($templates as $template) {
-    $options[$template->name] = $template->name . " " . $template->image_name . " " . $template->size;
+    $options[$template->name] = $template->name . " " . $template->machine_type . " " . $template->image_name . " " . $template->disk_size . " " . $template->disk_type;
   }
   $form['name'] = array(
     '#type' => 'select',
