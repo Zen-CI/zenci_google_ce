@@ -253,7 +253,6 @@ function zenci_google_ce_template_submit($form, &$form_state) {
 
   $template = array(
     'name' => $form_state['values']['name'],
-    'size' => $form_state['values']['size'],
     'machine_type' => $form_state['values']['machine_type'],
     'image_name' => $form_state['values']['image'],
     'disk_type' => $form_state['values']['disk_type'],
