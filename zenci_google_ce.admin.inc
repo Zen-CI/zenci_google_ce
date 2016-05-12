@@ -191,34 +191,24 @@ function zenci_google_ce_template($form, &$form_state) {
     '#description' => t('Please select image.'),
   );
   
-  return $form;
+  $disk_options = array(
+    'pd-ssd' => t('SSD persistent disk'),
+    'pd-standard' => t('Standard persistent disk'),
+  )
 
-  
-  
-  $digitalOceanAPI->reInitCurl();
-  
-  $sizes =  $digitalOceanAPI->getSizes();
-  
-  $size_options = array();
-  foreach($sizes as $size){
-    $size_options[$size->slug] = $size->slug;
-  }
-  
-  $form['name'] = array(
+  $form['disk'] = array(
+    '#type' => 'select',
+    '#title' => t('Disk type'),
+    '#options' => $disk_options,
+    '#description' => t('Please select disk type.'),
+  );
+
+  $form['disk_size'] = array(
     '#type' => 'textfield',
-    '#title' => t('Name'),
-    '#description' => t('This is a test task name.'),
+    '#title' => t('Disk size in GB'),
+    '#description' => t('Numbers only. No less than 10 GB'),
     '#required' => TRUE,
   );
-
-
-  $form['size'] = array(
-    '#type' => 'select',
-    '#title' => t('Size'),
-    '#options' => $size_options,
-    '#description' => t('Please select image.'),
-  );
-
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
