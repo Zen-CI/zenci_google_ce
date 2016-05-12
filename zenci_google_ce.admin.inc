@@ -155,7 +155,7 @@ function zenci_google_ce_template($form, &$form_state) {
     '#required' => TRUE,
   );
   
-  $MachineTypes = $GoogleComputeEngineAPI = getMachineTypes();
+  $MachineTypes = $GoogleComputeEngineAPI->getMachineTypes();
 
   $form['machine_type'] = array(
     '#type' => 'select',
