@@ -4,10 +4,7 @@
  * Prepare testing environment on DigitalOcean.
  * Spin Up VPS to process tests and destroy after.
  */
- 
- // URL ZenCI GoogleComputeEngine API.
-define('ZENCI_GOOGLE_OAUTH_TOKEN_URI', 'https://www.googleapis.com/oauth2/v4/token');
-define('ZENCI_GOOGLE_CE_SCOPE', 'https://www.googleapis.com/auth/compute');
+
 /**
  * Implements hook_config_info().
  */
@@ -225,22 +222,38 @@ function zenci_google_ce_get_value($env_vars, $variable) {
 function zenci_google_ce_get_class() {
   module_load_include('inc', 'zenci_google_ce', 'zenci_google_ce.class');
 
-  $api_token = zenci_google_ce_get_api_token();
-  $digitalOceanAPI = new digitalOceanAPI();
-  $digitalOceanAPI->setToken($api_token);
-  return $digitalOceanAPI;
+  $private_key = zenci_google_ce_get_private_key();
+  $project_id = zenci_google_ce_get_project_id();    
+
+  $GoogleComputeEngineAPI = new GoogleComputeEngineAPI();
+//  $GoogleComputeEngineAPI->setProjectID($project_id);
+//  $GoogleComputeEngineAPI->setPrivateKey($private_key);
+  
+  return $GoogleComputeEngineAPI;
 }
 
-function zenci_google_ce_get_api_token() {
+function zenci_google_ce_get_private_key() {
   $config = config('zenci_google_ce.settings');
   
-  // Use setting.php values if exists.
-  $api_token = settings_get('zenci_google_ce_api_token');
+  $private_key = settings_get('zenci_google_ce_private_key');
 
-  if (empty($api_token)) {
-    $api_token = $config->get('api_token');
+  if (empty($private_key)) {
+    $private_key = $config->get('private_key');  
   }
-  return $api_token;
+
+  return $private_key;
+}
+
+function zenci_google_ce_get_project_id() {
+  $config = config('zenci_google_ce.settings');
+  
+  $project_id = settings_get('zenci_google_ce_project_id');
+
+  if (empty($project_id)) {
+    $private_key = $config->get('project_id');  
+  }
+
+  return $project_id;
 }
 
 function zenci_google_ce_create_instance($template_name, $prefix){
