@@ -609,20 +609,17 @@ class GoogleComputeEngineAPI {
    */
    
   /**
-   * Get Image information.
-   * https://developers.digitalocean.com/documentation/v2/#retrieve-an-existing-image-by-id
+   * Get Instance information.
+   * https://cloud.google.com/compute/docs/reference/latest/instances/get
    *
    * @return
-   *   Return images information or FALSE if there is no images or no
+   *   Return Instance information or FALSE if there is no images or no
    *   access.
    *
    */
-  public function getDroplet($droplet_id) {
+  public function getInstance($name, $zone) {
 
-    $answer = $this->getRequest('droplets/' . $droplet_id);
-    if(isset($answer['droplet'])){
-      return $answer['droplet'];
-    }
+    $answer = $this->getRequest('zones/' . $zone . '/' . $name);
     return $answer;
   }
   
@@ -713,6 +710,8 @@ backdrop_set_message('<pre>' . print_r($zones,TRUE). '</pre>');
       
     $answer =  $this->postRequest('zones/' . $zone . '/instances', (array)$instance_settings);
 
+    $answer->zone = $zone;
+    $answer->instance_name = 'test-' . $template->name. "-zen-ci";
     return $answer;
 
   }

@@ -355,6 +355,10 @@ function zenci_google_ce_instance_submit($form, &$form_state) {
   $instance =  $GoogleComputeEngineAPI->createInstance($template);
   backdrop_set_message('<pre>' . json_encode($instance). '</pre>');
   
+  sleep(1);
+  $GoogleComputeEngineAPI->reInitCurl();
+  $instance_new = $GoogleComputeEngineAPI->getInstance($instance->instance_name, $instance->zone);
+  backdrop_set_message('<pre>' . print_r($instance_new, true). '</pre>');
   return;
   
   if($droplet->status != 'active'){
