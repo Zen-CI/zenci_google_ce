@@ -249,14 +249,6 @@ function zenci_google_ce_template_validate($form, &$form_state) {
  */
 function zenci_google_ce_template_submit($form, &$form_state) {
 
-  $image_name = '';
-  $images = $form_state['images'];
-  foreach($images as $image){
-    if($image->id == $form_state['values']['image']){
-      $image_name = $image->name;
-    }
-  }
-
   $template = array(
     'name' => $form_state['values']['name'],
     'size' => $form_state['values']['size'],
