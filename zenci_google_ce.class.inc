@@ -408,7 +408,7 @@ class GoogleComputeEngineAPI {
     if ($this->getToken()) {
       $this->curl->setHeader('Authorization', 'Bearer ' . $this->getToken());
     }
-    $this->curl->post(ZENCI_GOOGLE_CE_API_URI . '/' . $command, $params);
+    $this->curl->post(ZENCI_GOOGLE_CE_API_URI  . '/' . $this->project_id . '/' . $command, $params);
     $response = $this->getResponse();
     return $response;
   }
@@ -706,13 +706,11 @@ backdrop_set_message('<pre>' . print_r($zones,TRUE). '</pre>');
     $instance_settings->scheduling->automaticRestart = FALSE;
     
     $instance_settings->serviceAccounts = array($serviceAccount);
-    
-    return $instance_settings;
-  
-    $answer =  $this->postRequest('droplets', $settings);
-    if(isset($answer['droplet'])){
-      return $answer['droplet'];
-    }
+
+    backdrop_set_message('<pre>' . json_encode($instance_settings). '</pre>');
+      
+    $answer =  $this->postRequest('zones/' . $zone . '/instances', $instance_settings);
+
     return $answer;
 
   }
