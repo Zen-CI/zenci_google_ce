@@ -181,7 +181,7 @@ function zenci_google_ce_template($form, &$form_state) {
       if(isset($image->deprecated)){
         continue;
       }
-      $image_options[$project . ":" . $image->name] = $image->name;
+      $image_options[$project . ":" . $image->name] = $image->name . ' : ' . $image->description;
     }
   }
 
