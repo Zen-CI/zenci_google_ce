@@ -646,6 +646,8 @@ class GoogleComputeEngineAPI {
     
     $zones = $this->getZonesByMachineType($template->machine_type);
     
+backdrop_set_message('<pre>' . print_r($zones,TRUE). '</pre>');
+    
     $zone = $zones[rand(0,count($zones) - 1)];
     $this->reInitCurl();
     
