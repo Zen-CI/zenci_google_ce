@@ -173,8 +173,6 @@ function zenci_google_ce_template($form, &$form_state) {
 
   $private_images['private'] = $GoogleComputeEngineAPI->getImages();
 
-  backdrop_set_message('<pre>' . print_r($private_images, TRUE) . '</pre>');
-
   $image_options = array();
   foreach($private_images as $project => $images) {
     foreach($images as $image){
