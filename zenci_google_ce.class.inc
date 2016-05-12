@@ -532,22 +532,36 @@ class GoogleComputeEngineAPI {
     return $answer;
   }
   
+
   /**
-   * Get Size information.
-   * https://developers.digitalocean.com/documentation/v2/#sizes
+   * Get aggregated machineTypes information.
+   * https://cloud.google.com/compute/docs/reference/latest/machineTypes/aggregatedList
    *
    * @return
-   *   Return size information or FALSE if there is no sizes or no
+   *   Return images information or FALSE if there is no images or no
    *   access.
    *
    */
-  public function getSizes() {
-    $answer = $this->getRequest('sizes');
-    if(isset($answer['sizes'])){
-      return $answer['sizes'];
+  public function getMachineTypes($zone = '') {
+    
+    $cmd = 'aggregated/machineTypes';
+    if($zone) {
+      $cmd = 'zones/' . $zone . '/machineTypes';
+    }
+
+    $answer = $this->getRequest($cmd);
+    if(isset($answer['items'])){
+      $machineTypes = array();
+      foreach($answer['items'] as $zone => $value){
+        foreach($value->machineTypes as $machineType){
+          $machineTypes[$machineType->name] = $machineType->name . ' ' . $machineType->description;
+        }
+      }
+      return $machineTypes;
     }
     return $answer;
   }
+  
   /**
    * Create droplet.
    * https://developers.digitalocean.com/documentation/v2/#create-a-new-droplet

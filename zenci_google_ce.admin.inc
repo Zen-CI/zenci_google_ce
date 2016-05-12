@@ -154,6 +154,16 @@ function zenci_google_ce_template($form, &$form_state) {
     '#description' => t('This is a test task name.'),
     '#required' => TRUE,
   );
+  
+  $MachineTypes = $GoogleComputeEngineAPI = getMachineTypes();
+
+  $form['machine_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Machine type'),
+    '#options' => $MachineTypes,
+    '#description' => t('Please machine type.'),
+  );
+
 
   $public_projects = array(
     'centos-cloud',
