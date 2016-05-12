@@ -580,7 +580,7 @@ class GoogleComputeEngineAPI {
     if(isset($answer['items'])){
       $zones = array();
       foreach($answer['items'] as $zone_name => $value){
-        $zones[] = $zone_name;
+        $zones[] = substr($zone_name, 6);
       }
       return $zones;
     }
