@@ -709,7 +709,7 @@ backdrop_set_message('<pre>' . print_r($zones,TRUE). '</pre>');
 
     backdrop_set_message('<pre>' . json_encode($instance_settings). '</pre>');
       
-    $answer =  $this->postRequest('zones/' . $zone . '/instances', $instance_settings);
+    $answer =  $this->postRequest('zones/' . $zone . '/instances', (array)$instance_settings);
 
     return $answer;
 
