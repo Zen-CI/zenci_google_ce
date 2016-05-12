@@ -499,6 +499,10 @@ class GoogleComputeEngineAPI {
    *
    */
   public function getPublicImages($project) {
+    
+    // We update token before call to make sure that token is updated.
+    $this->updateToken();
+    
     $current_project_id = $this->project_id;
     $this->project_id = $project;
     $answer = $this->getRequest('global/images');
