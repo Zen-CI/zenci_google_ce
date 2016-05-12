@@ -617,8 +617,8 @@ class GoogleComputeEngineAPI {
    *   access.
    *
    */
-  public function getInstance($name, $zone) {
-
+  public function getInstance($zone, $name) {
+    $this->setDebug(TRUE);
     $answer = $this->getRequest('zones/' . $zone . '/' . $name);
     return $answer;
   }
@@ -711,7 +711,7 @@ backdrop_set_message('<pre>' . print_r($zones,TRUE). '</pre>');
 
     sleep(1);
     $this->reInitCurl();
-    $instance_new = $this->getInstance('test-' . $template->name. "-zen-ci", $zone);
+    $instance_new = $this->getInstance($zone, 'test-' . $template->name. "-zen-ci");
 
     backdrop_set_message('<pre>' . print_r($instance_new, true). '</pre>');
 
