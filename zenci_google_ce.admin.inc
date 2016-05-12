@@ -260,8 +260,10 @@ function zenci_google_ce_template_submit($form, &$form_state) {
   $template = array(
     'name' => $form_state['values']['name'],
     'size' => $form_state['values']['size'],
-    'image_id' => $form_state['values']['image'],
-    'image_name' => $image_name,
+    'machine_type' => $form_state['values']['machine_type'],
+    'image_name' => $form_state['values']['image'],
+    'disk_type' => $form_state['values']['disk_type'],
+    'disk_size' => $form_state['values']['disk_size'],
   );
   if(FALSE !== backdrop_write_record('zenci_google_ce_templates', $template)){
     backdrop_set_message(t('Template !name created', array(

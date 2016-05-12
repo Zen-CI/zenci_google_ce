@@ -39,6 +39,19 @@ function zenci_google_ce_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'disk_type' => array(
+        'description' => 'Disk type: pd-ssd or pd-standard.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'disk_size' => array(
+        'description' => 'Disk size in Gb.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'unique keys' => array(
       'id' => array('id'),
