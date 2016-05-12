@@ -12,7 +12,7 @@ function zenci_google_ce_settings() {
 
   // Use setting.php values if exists.
   $project_id = settings_get('zenci_google_ce_project_id');
-  
+
   $form['project_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Project id'),
@@ -23,7 +23,7 @@ function zenci_google_ce_settings() {
 
   // Use setting.php values if exists.
   $private_key = settings_get('zenci_google_ce_private_key');
-  
+
   $form['private_key'] = array(
     '#type' => 'textarea',
     '#title' => t('Private Key'),
@@ -31,13 +31,13 @@ function zenci_google_ce_settings() {
     '#description' => t('You need to get Service Account Key here: https://console.cloud.google.com/iam-admin/serviceaccounts/serviceaccounts-zero'),
     '#disabled' => !empty($private_key) ? TRUE : FALSE,
   );
-  
+
   $token = $config->get('token');
 
   if($token){
     $token_expire = $config->get('token_expire');
     $now = time();
-    
+
     $description = '';
     if($token_expire < $now){
       $description = t('Token expired.');
@@ -45,7 +45,7 @@ function zenci_google_ce_settings() {
     else{
       $description = t('This token expire in !sec seconds', array('!sec' => $token_expire - $now));
     }
-    
+
     $form['token'] = array(
       '#type' => 'textfield',
       '#title' => t('Current token'),
@@ -55,7 +55,7 @@ function zenci_google_ce_settings() {
     );
   }
 
-  
+
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -78,7 +78,7 @@ function zenci_google_ce_settings_submit($form, &$form_state) {
   if (empty($project_id)) {
     $config->set('project_id', $form_state['values']['project_id']);
   }
-  
+
 
   // Use setting.php values if exists.
   $private_key = settings_get('zenci_google_ce_private_key');
@@ -86,10 +86,10 @@ function zenci_google_ce_settings_submit($form, &$form_state) {
   if (empty($private_key)) {
     $config->set('private_key', $form_state['values']['private_key']);
   }
-  
+
 
   $config->save();
-  
+
   backdrop_set_message(t('The configuration options have been saved.'));
 }
 
@@ -139,14 +139,14 @@ function zenci_google_ce_templates() {
     '#header' => $header,
     '#empty' => t('No templates yet.'),
   );
-  return $output;  
+  return $output;
 }
 
 /**
  * Add template form.
  */
 function zenci_google_ce_template($form, &$form_state) {
-  
+
   $GoogleComputeEngineAPI = zenci_google_ce_get_class();
   $form['name'] = array(
     '#type' => 'textfield',
@@ -154,7 +154,7 @@ function zenci_google_ce_template($form, &$form_state) {
     '#description' => t('This is a test task name.'),
     '#required' => TRUE,
   );
-  
+
   $public_projects = array(
     'centos-cloud',
     'google-containers',
@@ -190,11 +190,11 @@ function zenci_google_ce_template($form, &$form_state) {
     '#options' => $image_options,
     '#description' => t('Please select image.'),
   );
-  
+
   $disk_options = array(
     'pd-ssd' => t('SSD persistent disk'),
     'pd-standard' => t('Standard persistent disk'),
-  )
+  );
 
   $form['disk'] = array(
     '#type' => 'select',
@@ -246,7 +246,7 @@ function zenci_google_ce_template_submit($form, &$form_state) {
       $image_name = $image->name;
     }
   }
-    
+
   $template = array(
     'name' => $form_state['values']['name'],
     'size' => $form_state['values']['size'],
@@ -258,7 +258,7 @@ function zenci_google_ce_template_submit($form, &$form_state) {
       '!name' => $template['name'],
     )));
   }
-  backdrop_goto('admin/config/system/google_ce/list');  
+  backdrop_goto('admin/config/system/google_ce/list');
 }
 
 /**
@@ -316,7 +316,7 @@ function zenci_google_ce_instance($form, &$form_state) {
   $options = array();
   foreach ($templates as $template) {
     $options[$template->name] = $template->name . " " . $template->image_name . " " . $template->size;
-  }  
+  }
   $form['name'] = array(
     '#type' => 'select',
     '#title' => t('Template name'),
@@ -338,23 +338,23 @@ function zenci_google_ce_instance($form, &$form_state) {
  * Submit handler for the zenci_google_ce_instance() form.
  */
 function zenci_google_ce_instance_submit($form, &$form_state) {
-  
+
   $template = db_select('zenci_google_ce_templates', 'gh')
     ->fields('gh')
     ->condition('name', $form_state['values']['name'])
     ->execute()
     ->fetchObject();
-  
+
   $digitalOceanAPI = zenci_google_ce_get_class();
   $image = $digitalOceanAPI->getImage($template->image_id);
-  
+
   $digitalOceanAPI->reInitCurl();
-  
+
   $settings = array(
     'name' => 'test.' . $template->name. ".zen.ci",
     'region' => $image->regions[0],
     'size' => $template->size,
-    'image' => $template->image_id,    
+    'image' => $template->image_id,
   );
 
   $droplet =  $digitalOceanAPI->createDroplet($settings);
@@ -362,7 +362,7 @@ function zenci_google_ce_instance_submit($form, &$form_state) {
 
   if($droplet->status != 'active'){
     while(TRUE){
-      sleep(5);  
+      sleep(5);
       $digitalOceanAPI->reInitCurl();
       $data = $digitalOceanAPI->getDroplet($droplet->id);
       if($data->status == 'active'){
@@ -373,5 +373,5 @@ function zenci_google_ce_instance_submit($form, &$form_state) {
     }
   }
 
-   
+
 }
