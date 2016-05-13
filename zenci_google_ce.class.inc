@@ -433,7 +433,7 @@ class GoogleComputeEngineAPI {
       $this->curl->setHeader('Authorization', 'Bearer ' . $this->getToken());
     }
 
-    $this->curl->delete(ZENCI_GOOGLE_CE_API_URI . '/' . $this->project_id . '/' . $command);
+    $this->curl->delete(ZENCI_GOOGLE_CE_API_URI . '/' . $this->project_id . '/' . $command, $params);
     $response = $this->getResponse();
     return $response;
   }
@@ -699,7 +699,7 @@ class GoogleComputeEngineAPI {
     $instance_settings->scheduling->onHostMaintenance = "TERMINATE";
     $instance_settings->scheduling->automaticRestart = FALSE;
     
-    $instance_settings->serviceAccounts = array($serviceAccount);
+//    $instance_settings->serviceAccounts = array($serviceAccount);
  
  
     $time = time();
