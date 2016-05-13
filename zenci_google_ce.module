@@ -302,6 +302,8 @@ function zenci_google_ce_create_instance($name, $template_name){
     if(FALSE !== backdrop_write_record('zenci_google_ce_instances', $record)){
       return $record;
     }
+  } else {
+    watchdog('zenci_google_ce', 'Create false : ' . print_r($GoogleComputeEngineAPI->testingGetHeaders(),true));
   }
   return FALSE;
 }
