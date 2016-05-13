@@ -434,8 +434,7 @@ class GoogleComputeEngineAPI {
     }
 
     $this->curl->delete(ZENCI_GOOGLE_CE_API_URI . '/' . $this->project_id . '/' . $command, $params, FALSE);
-    //fix issue when POST fields set to two empty mytes.
-//    $this->curl->setOpt(CURLOPT_POSTFIELDS, FALSE);
+
     $response = $this->getResponse();
     return $response;
   }

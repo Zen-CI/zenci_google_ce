@@ -399,12 +399,12 @@ function zenci_google_ce_instance_del_submit($form, &$form_state) {
     ->fetchObject();
     
   $answer = zenci_google_ce_delete_instance($instance);
-
-  backdrop_set_message('<pre>' . print_r($answer,true). '</pre>');
   
-/*  db_delete('zenci_google_ce_instances')
+  if(is_array($answer) && isset($answer['status'])){
+    db_delete('zenci_google_ce_instances')
     ->condition('id', $instance->id)
-    ->execute();*/
+    ->execute();
+  }
   backdrop_set_message(t('Instance !name deleted!', array('!name' => $instance->name )));
 }
 
