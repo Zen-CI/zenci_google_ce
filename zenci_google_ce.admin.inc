@@ -367,7 +367,7 @@ function zenci_google_ce_instance_del($form, &$form_state) {
 
   $options = array();
   foreach ($instances as $instance) {
-    $options[$instance->id] = $instance->name . " " . $template->template;
+    $options[$instance->id] = $instance->name . " ip: " . $instance->ip . "  zone: " .$instance->zone;
   }
   $form['name'] = array(
     '#type' => 'select',
@@ -384,5 +384,23 @@ function zenci_google_ce_instance_del($form, &$form_state) {
   );
 
   return $form;
+}
+
+/**
+ * Submit handler for the zenci_google_ce_instance_del() form.
+ */
+function zenci_google_ce_instance_del_submit($form, &$form_state) {
+  $instance_id = $form_state['values']['name'];
+  
+  $instance = db_select('zenci_google_ce_instances', 'gh')
+    ->fields('gh')
+    ->condition('id', $template_id)
+    ->execute()
+    ->fetchObject();
+  
+/*  db_delete('zenci_google_ce_instances')
+    ->condition('id', $instance->id)
+    ->execute();*/
+  backdrop_set_message(t('Instance !name deleted!', array('!name' => $instance->name )));
 }
 

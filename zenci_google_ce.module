@@ -73,7 +73,7 @@ function zenci_google_ce_menu() {
   );
 
   $items['admin/config/system/google_ce/instance_add'] = array(
-    'title' => 'Add template',
+    'title' => 'Add instance',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('zenci_google_ce_instance', 4),
     'access callback' => 'user_access',
@@ -83,7 +83,7 @@ function zenci_google_ce_menu() {
   );
 
   $items['admin/config/system/google_ce/instance_del'] = array(
-    'title' => 'Add template',
+    'title' => 'Delete instance',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('zenci_google_ce_instance_del', 4),
     'access callback' => 'user_access',
