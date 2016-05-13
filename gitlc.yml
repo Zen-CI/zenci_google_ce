@@ -5,9 +5,9 @@ test:
       password: 'test'
       dir: '{home}/github/branch/{branch}'
       scripts:
-        init: '{deploy_dir}/core/misc/zen-zi/init_test.sh'
+        init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
       tests:
-        - '{deploy_dir}/core/misc/zen-zi/run_tests.sh'
+        - '{deploy_dir}/core/misc/zen-ci/run_tests.sh'
       webhooks:
         before_deploy: http://backdrop.zen.ci/webhook/google_ce_before
         after_deploy: http://backdrop.zen.ci/webhook/google_ce_after
@@ -17,9 +17,9 @@ test:
       password: 'test'
       dir: '{home}/github/pr/{pr_number}'
       scripts:
-        init: '{deploy_dir}/core/misc/zen-zi/init_test.sh'
+        init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
       tests:
-        - '{deploy_dir}/core/misc/zen-zi/run_tests.sh'
+        - '{deploy_dir}/core/misc/zen-ci/run_tests.sh'
       webhooks:
         before_deploy: http://backdrop.zen.ci/webhook/google_ce_before
         after_deploy: http://backdrop.zen.ci/webhook/google_ce_after
