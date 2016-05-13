@@ -357,19 +357,7 @@ function zenci_google_ce_instance_submit($form, &$form_state) {
   backdrop_set_message('<pre>' . print_r($instance,true). '</pre>');
   
   return;
-  
-  if($droplet->status != 'active'){
-    while(TRUE){
-      sleep(5);
-      $digitalOceanAPI->reInitCurl();
-      $data = $digitalOceanAPI->getDroplet($droplet->id);
-      if($data->status == 'active'){
-        $ip_data = $data->networks->v4[0];
-        backdrop_set_message('IP is: ' . $ip_data->ip_address );
-        break;
-      }
-    }
-  }
+
 }
 
 /**
