@@ -351,6 +351,7 @@ function zenci_google_ce_instance_submit($form, &$form_state) {
     ->fetchObject();
 
   $GoogleComputeEngineAPI = zenci_google_ce_get_class();
+  $GoogleComputeEngineAPI->setDebug(true);
   
   $instance =  $GoogleComputeEngineAPI->createInstance($template);
   backdrop_set_message('<pre>' . print_r($instance,true). '</pre>');

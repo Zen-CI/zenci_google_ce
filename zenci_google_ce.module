@@ -133,7 +133,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
         );
       }
       break;
-    case 'digitalocean_before':
+    case 'google_ce_before':
       /** ZenCI before test request from ZenCI server.
        *
        * @param $data array
@@ -182,7 +182,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
          break;         
        }
       break;
-    case 'digitalocean_after':
+    case 'google_ce_after':
       /** ZenCI before test request from ZenCI server.
        *
        * @param $data array
