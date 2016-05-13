@@ -717,6 +717,8 @@ class GoogleComputeEngineAPI {
         if($data['status'] == 'RUNNING'){
           $ip = $data['networkInterfaces'][0]->accessConfigs[0]->natIP;
           backdrop_set_message('IP is: ' . $ip . " time " . (time() - $time) . " sec" );
+          $data['zone_name'] = $zone;
+          $data['ip_address'] = $ip;
           return $data;
         }
       } 

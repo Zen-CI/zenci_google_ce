@@ -288,6 +288,8 @@ function zenci_google_ce_create_instance($name, $template_name){
       'pr' => 0, //pr number
       'template' => $template_name,
       'results' => 'some data here', 
+      'zone' => $instance['zone_name'],
+      'ip' => $instance['ip_address']
     );
     if(FALSE !== backdrop_write_record('zenci_google_ce_instances', $record)){
       return $record;
