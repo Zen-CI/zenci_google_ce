@@ -705,7 +705,12 @@ class GoogleComputeEngineAPI {
     $time = time();
     $answer =  $this->postRequest('zones/' . $zone . '/instances', (array)$instance_settings);
     
+    $count = 1;
     while(TRUE){
+      $count ++;
+      if($count > 10){
+        break;
+      }
       sleep(5);
       $this->reInitCurl();
       $data = $this->getInstance($zone, 'test-' . $template->name. "-zen-ci");
