@@ -296,7 +296,7 @@ class GoogleComputeEngineAPI {
    * @return
    *   String with error message.
    */
-  public function getDigitalOceanErrorMessage() {
+  public function getGoogleCEErrorMessage() {
     return $this->error_message;
   }
 
@@ -311,13 +311,13 @@ class GoogleComputeEngineAPI {
       backdrop_set_message('<pre>' . print_r($this->testingGetHeaders(), TRUE) . '</pre>');
     }
     if ($this->isError()) {
-      if (isset($this->curl->response->error) && $this->curl->response->error) {
-        if (isset($this->curl->response->message)) {
-          $this->error_message = $this->curl->response->message;
+      if (isset($this->curl->response->error)) {
+        if (isset($this->curl->response->error->message)) {
+          $this->error_message = $this->curl->response->error->message;
         }
       }
 
-      if ($message = $this->getDigitalOceanErrorMessage()) {
+      if ($message = $this->getGoogleCEErrorMessage()) {
         backdrop_set_message(t('DigitalOcean error message !message', array('!message' => $message)), 'error');
       }
       else {
@@ -708,8 +708,7 @@ backdrop_set_message('<pre>' . print_r($zones,TRUE). '</pre>');
       
     $answer =  $this->postRequest('zones/' . $zone . '/instances', (array)$instance_settings);
 
-
-    sleep(1);
+    sleep(10);
     $this->reInitCurl();
     $instance_new = $this->getInstance($zone, 'test-' . $template->name. "-zen-ci");
 
