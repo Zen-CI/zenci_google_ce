@@ -318,7 +318,7 @@ class GoogleComputeEngineAPI {
       }
 
       if ($message = $this->getGoogleCEErrorMessage()) {
-        backdrop_set_message(t('DigitalOcean error message !message', array('!message' => $message)), 'error');
+        backdrop_set_message(t('Google Compute Engine API error message !message', array('!message' => $message)), 'error');
       }
       else {
         $code = $this->curl->errorCode;
