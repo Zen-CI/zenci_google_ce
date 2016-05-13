@@ -88,6 +88,13 @@ function zenci_google_ce_schema() {
         'not null' => TRUE,
         'default' => '',
       ),
+      'zone' => array(
+        'description' => 'Instance zone.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
       'repo' => array(
         'description' => 'Repository name.',
         'type' => 'varchar',
@@ -136,4 +143,24 @@ function zenci_google_ce_schema() {
   );
 
   return $schema;
+}
+
+/**
+ * Add a column for zone to the zenci_google_ce table.
+ */
+function zenci_google_ce_update_1001() {
+
+  if (db_field_exists('zenci_google_ce_instances', 'zone')) {
+    return;
+  }
+
+  $schema = array(
+    'description' => 'Instance zone.',
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    'default' => '',
+  );
+  db_add_field('zenci_google_ce_instances', 'zone', $schema);
+
 }
