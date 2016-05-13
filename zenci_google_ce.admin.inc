@@ -359,28 +359,28 @@ function zenci_google_ce_instance_submit($form, &$form_state) {
  */
 function zenci_google_ce_instance_del($form, &$form_state) {
 
-  $templates = db_select('zenci_google_ce_templates', 'wr')
+  $instances = db_select('zenci_google_ce_instances', 'wr')
     ->fields('wr')
     ->orderBy('name', 'DESC')
     ->execute()
     ->fetchAll();
 
   $options = array();
-  foreach ($templates as $template) {
-    $options[$template->name] = $template->name . " " . $template->machine_type . " " . $template->image_name . " " . $template->disk_size . " " . $template->disk_type;
+  foreach ($instances as $instance) {
+    $options[$instance->id] = $instance->name . " " . $template->template;
   }
   $form['name'] = array(
     '#type' => 'select',
-    '#title' => t('Template name'),
+    '#title' => t('Instances'),
     '#options' => $options,
-    '#description' => t('Please select template name.'),
+    '#description' => t('Please select instance.'),
   );
 
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Add instance'),
+    '#value' => t('Del instance'),
   );
 
   return $form;
