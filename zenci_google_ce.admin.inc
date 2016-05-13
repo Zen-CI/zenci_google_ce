@@ -344,20 +344,14 @@ function zenci_google_ce_instance($form, &$form_state) {
  */
 function zenci_google_ce_instance_submit($form, &$form_state) {
 
-  $template = db_select('zenci_google_ce_templates', 'gh')
-    ->fields('gh')
-    ->condition('name', $form_state['values']['name'])
-    ->execute()
-    ->fetchObject();
+  $name = 'test-' . time();
+  $template_name = $form_state['values']['name'];
+  $instance = zenci_google_ce_create_instance($name, $template_name);
 
-  $GoogleComputeEngineAPI = zenci_google_ce_get_class();
-//  $GoogleComputeEngineAPI->setDebug(true);
-  
-  $instance =  $GoogleComputeEngineAPI->createInstance($template);
-  backdrop_set_message('<pre>' . print_r($instance,true). '</pre>');
-  
-  return;
-
+  if($instance){
+    backdrop_set_message(t('Instance created'));
+    backdrop_set_message('<pre>' . print_r($instance,true). '</pre>');
+  }  
 }
 
 /**

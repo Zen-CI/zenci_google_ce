@@ -638,11 +638,9 @@ class GoogleComputeEngineAPI {
    *   Return Instance information or FALSE if there is no access.
    *
    */
-  public function createInstance($template) {
+  public function createInstance($name, $template) {
     
     $zones = $this->getZonesByMachineType($template->machine_type);
-    
-backdrop_set_message('<pre>' . print_r($zones,TRUE). '</pre>');
     
     $zone = $zones[rand(0,count($zones) - 1)];
     $this->reInitCurl();
@@ -665,7 +663,7 @@ backdrop_set_message('<pre>' . print_r($zones,TRUE). '</pre>');
     $disk->boot = TRUE;
     $disk->mode = 'READ_WRITE';
     $disk->autoDelete = TRUE;
-    $disk->deviceName = 'test-' . $template->name. "-zen-ci";
+    $disk->deviceName = $name . "-disk";
     $disk->initializeParams = new stdClass();;
     $disk->initializeParams->sourceImage = 'projects/' . $this->project_id .'/global/images/php53';
     
@@ -687,7 +685,7 @@ backdrop_set_message('<pre>' . print_r($zones,TRUE). '</pre>');
     $serviceAccount->scopes = array(ZENCI_GOOGLE_CE_INSTANCE_SCOPE);
     
     $instance_settings = new stdClass();
-    $instance_settings->name = 'test-' . $template->name. "-zen-ci";
+    $instance_settings->name = $name;
     $instance_settings->zone = "projects/" . $this->project_id . "/zones/" . $zone;
     $instance_settings->machineType = "projects/" . $this->project_id . "/zones/" . $zone ."/machineTypes/" . $template->machine_type;
     $instance_settings->metadata = $metadata;

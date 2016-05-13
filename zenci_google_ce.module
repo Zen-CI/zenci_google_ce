@@ -267,38 +267,31 @@ function zenci_google_ce_get_project_id() {
   return $project_id;
 }
 
-function zenci_google_ce_create_instance($template_name, $prefix){
+function zenci_google_ce_create_instance($name, $template_name){
   $template = db_select('zenci_google_ce_templates', 'gh')
     ->fields('gh')
     ->condition('name', $template_name)
     ->execute()
     ->fetchObject();
   
-  $digitalOceanAPI = zenci_google_ce_get_class();
-  $image = $digitalOceanAPI->getImage($template->image_id);
-  
-  $digitalOceanAPI->reInitCurl();
-  
-  $settings = array(
-    'name' => $prefix . '.' . $template->name. ".zen.ci",
-    'region' => $image->regions[0],
-    'size' => $template->size,
-    'image' => $template->image_id,    
-  );
+  $GoogleComputeEngineAPI = zenci_google_ce_get_class();
 
-  $droplet =  $digitalOceanAPI->createDroplet($settings);
-
-  if($droplet->status != 'active'){
-    while(TRUE){
-      sleep(5);  
-      $digitalOceanAPI->reInitCurl();
-      $data = $digitalOceanAPI->getDroplet($droplet->id);
-      if($data->status == 'active'){
-        sleep(5); //Do extra 5 sec sleep to make sure that Instance is up now. 
-        return $data;
-      }
+  $instance =  $GoogleComputeEngineAPI->createInstance($name, $template);  
+  
+  if($instance){
+    $record = array(
+      'name' => $name,
+      'created' => time(), // Here we need to parse : [creationTimestamp] => 2016-05-13T11:49:54.890-07:00
+      'owner' => 'owner', //repo owner.
+      'repo' => 'repo', // repo name.
+      'branch' => 'branch', //branch name.
+      'pr' => 0, //pr number
+      'template' => $template_name,
+      'results' => 'some data here', 
+    );
+    if(FALSE !== backdrop_write_record('zenci_google_ce_instances', $record)){
+      return $record;
     }
-  }else{
-    return $droplet;
   }
+  return FALSE;
 }
