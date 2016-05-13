@@ -433,7 +433,7 @@ class GoogleComputeEngineAPI {
       $this->curl->setHeader('Authorization', 'Bearer ' . $this->getToken());
     }
 
-    $this->curl->delete(ZENCI_GOOGLE_CE_API_URI . '/' . $this->project_id . '/' . $command, $params);
+    $this->curl->delete(ZENCI_GOOGLE_CE_API_URI . '/' . $this->project_id . '/' . $command);
     $response = $this->getResponse();
     return $response;
   }
