@@ -169,26 +169,14 @@ function zenci_google_ce_zenci_webhook($method, $data) {
            // create VPS
            $prefix = '';
            if($data['pull_request']){
-             $prefix .= $data['pull_request'] . ".";
+             $prefix .= $data['pull_request'] . "-";
            }
-           $prefix = $data['branch'] . "." . $data['repo_name'] . "." . $data['repo_owner'];
-           $droplet = zenci_google_ce_create_instance($data['test'], $prefix);
+           $name = $data['branch'] . "-" . $data['repo_name'] . "-" . $data['repo_owner'] . "-" . substr($data['sha'], 0, 6);
+           $instance = zenci_google_ce_create_instance($name, $data['test']);
            
-           if($droplet){
-             $record = array(
-               'droplet_id' => $droplet->id,
-               'created' => time(),
-               'owner' => $data['repo_owner'],
-               'repo' => $data['repo_name'],
-               'branch' => $data['branch'],
-               'pr' => (int) $data['pull_request'],
-               'name' => $data['test'],
-             );
-             backdrop_write_record('zenci_google_ce_instances', $record);
-           }
            
            $answer = array();
-           $answer['server'] = $droplet->networks->v4[0]->ip_address;
+           $answer['server'] = $instance['ip'];
            return $answer;
          break;         
        }
@@ -215,6 +203,21 @@ function zenci_google_ce_zenci_webhook($method, $data) {
          case 'opened':
          case 'synchronize':
            // destroy VPS
+           $prefix = '';
+           if($data['pull_request']){
+             $prefix .= $data['pull_request'] . "-";
+           }
+           $name = $data['branch'] . "-" . $data['repo_name'] . "-" . $data['repo_owner'] . "-" . substr($data['sha'], 0, 6);
+           $instance = db_select('zenci_google_ce_instances', 'gh')
+              ->fields('gh')
+              ->condition('name', $name)
+              ->execute()
+              ->fetchObject();
+            if($instance){
+             zenci_google_ce_delete_instance($instance);
+            }
+           
+           
          break;         
        }
       break;
