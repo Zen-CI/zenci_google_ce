@@ -177,7 +177,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
            }
            $name = strtolower($name);
            $instance = zenci_google_ce_create_instance($name, $data['test']);
-           sleep(5); // Extra 5 sec to allow SSH start up.
+           sleep(15); // Extra 15 sec to allow SSH start up.
            
            $answer = array();
            $answer['server'] = $instance['ip'];
