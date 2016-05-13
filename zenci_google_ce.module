@@ -317,5 +317,13 @@ function zenci_google_ce_delete_instance($instance){
   watchdog('zenci_google_ce', ' Delete instance !name', array('!name' => $instance->name));
 
   $GoogleComputeEngineAPI = zenci_google_ce_get_class();
-  return $GoogleComputeEngineAPI->deleteInstance($instance->zone, $instance->name);
+  
+  $answer = $GoogleComputeEngineAPI->deleteInstance($instance->zone, $instance->name);
+  if(is_array($answer) && isset($answer['status'])){
+    db_delete('zenci_google_ce_instances')
+    ->condition('id', $instance->id)
+    ->execute();
+    return TRUE;
+  }
+  return FALSE;
 }
