@@ -702,31 +702,21 @@ backdrop_set_message('<pre>' . print_r($zones,TRUE). '</pre>');
     $instance_settings->scheduling->automaticRestart = FALSE;
     
     $instance_settings->serviceAccounts = array($serviceAccount);
-
-//    backdrop_set_message('<pre>' . json_encode($instance_settings). '</pre>');
-      
+ 
+ 
+    $time = time();
     $answer =  $this->postRequest('zones/' . $zone . '/instances', (array)$instance_settings);
-    backdrop_set_message('<pre>' . print_r($answer, true). '</pre>');
-
-    sleep(5);
-    $this->reInitCurl();
-    $instance_new = $this->getInstance($zone, 'test-' . $template->name. "-zen-ci");
-    backdrop_set_message('<pre>' . print_r($instance_new, true). '</pre>');
-
-
-    sleep(5);
-    $this->reInitCurl();
-    $instance_new = $this->getInstance($zone, 'test-' . $template->name. "-zen-ci");
-    backdrop_set_message('<pre>' . print_r($instance_new, true). '</pre>');
-
-    sleep(5);
-    $this->reInitCurl();
-    $instance_new = $this->getInstance($zone, 'test-' . $template->name. "-zen-ci");
-
-    backdrop_set_message('<pre>' . print_r($instance_new, true). '</pre>');
-
-    return $answer;
-
+    
+    while(TRUE){
+      sleep(5);
+      $this->reInitCurl();
+      $data = $this->getInstance($zone, 'test-' . $template->name. "-zen-ci");
+      if($data->status == 'RUNNING'){
+        $ip = $data->networkInterfaces[0]->accessConfigs[0]->natIP;
+        backdrop_set_message('IP is: ' . $ip . " time " . (time() - $time) . " sec" );
+        return $data;
+      }
+    }
   }
 
   /**
