@@ -171,7 +171,10 @@ function zenci_google_ce_zenci_webhook($method, $data) {
            if($data['pull_request']){
              $prefix .= $data['pull_request'] . "-";
            }
-           $name = $data['branch'] . "-" . $data['repo_name'] . "-" . $data['repo_owner'] . "-" . substr($data['sha'], 0, 6);
+           $name = $data['branch'] . "-" . $data['repo_name'] . "-" . $data['repo_owner'];
+           if(isset($data['sha'])){
+             $name = $name . "-" . substr($data['sha'], 0, 6);
+           }
            $instance = zenci_google_ce_create_instance($name, $data['test']);
            
            
@@ -276,6 +279,8 @@ function zenci_google_ce_create_instance($name, $template_name){
     ->condition('name', $template_name)
     ->execute()
     ->fetchObject();
+    
+  watchdog('zenci_google_ce', ' Create instance !name !template_name', array('!name' => $name, '!template_name' => $template_name));
   
   $GoogleComputeEngineAPI = zenci_google_ce_get_class();
 
@@ -302,6 +307,8 @@ function zenci_google_ce_create_instance($name, $template_name){
 }
 
 function zenci_google_ce_delete_instance($instance){
+  watchdog('zenci_google_ce', ' Delete instance !name', array('!name' => $instance->name));
+
   $GoogleComputeEngineAPI = zenci_google_ce_get_class();
   return $GoogleComputeEngineAPI->deleteInstance($instance->zone, $instance->name);
 }
