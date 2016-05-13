@@ -745,7 +745,7 @@ class GoogleComputeEngineAPI {
     return $this->deleteRequest(
       'zones/:zone/instances/:instance', array(
         ':zone' => $zone,
-        ':name' => $name,
+        ':instance' => $name,
       )
     );
   }
