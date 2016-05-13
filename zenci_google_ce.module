@@ -82,6 +82,17 @@ function zenci_google_ce_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['admin/config/system/google_ce/instance_del'] = array(
+    'title' => 'Add template',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('zenci_google_ce_instance_del', 4),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'zenci_google_ce.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
+
+
   $items['admin/config/system/google_ce/%/delete'] = array(
     'title' => 'Remove template',
     'page callback' => 'backdrop_get_form',

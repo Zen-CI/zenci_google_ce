@@ -371,62 +371,36 @@ function zenci_google_ce_instance_submit($form, &$form_state) {
     }
   }
 }
-/*
-POST https://www.googleapis.com/compute/v1/projects/analog-subset-130814/zones/europe-west1-d/instances
-{
-  "name": "instance-3",
-  "zone": "projects/analog-subset-130814/zones/europe-west1-d",
-  "machineType": "projects/analog-subset-130814/zones/europe-west1-d/machineTypes/n1-standard-1",
-  "metadata": {
-    "items": []
-  },
-  "tags": {
-    "items": [
-      "http-server",
-      "https-server"
-    ]
-  },
-  "disks": [
-    {
-      "type": "PERSISTENT",
-      "boot": true,
-      "mode": "READ_WRITE",
-      "autoDelete": true,
-      "deviceName": "instance-3",
-      "initializeParams": {
-        "sourceImage": "projects/analog-subset-130814/global/images/php53",
-        "diskType": "projects/analog-subset-130814/zones/europe-west1-d/diskTypes/pd-standard",
-        "diskSizeGb": "10"
-      }
-    }
-  ],
-  "canIpForward": false,
-  "networkInterfaces": [
-    {
-      "network": "projects/analog-subset-130814/global/networks/default",
-      "accessConfigs": [
-        {
-          "name": "External NAT",
-          "type": "ONE_TO_ONE_NAT"
-        }
-      ]
-    }
-  ],
-  "description": "",
-  "scheduling": {
-    "preemptible": false,
-    "onHostMaintenance": "MIGRATE",
-    "automaticRestart": true
-  },
-  "serviceAccounts": [
-    {
-      "email": "default",
-      "scopes": [
-        "https://www.googleapis.com/auth/devstorage.read_only",
-        "https://www.googleapis.com/auth/logging.write",
-        "https://www.googleapis.com/auth/monitoring.write",
-        "https://www.googleapis.com/auth/cloud.useraccounts.readonly"
-      ]
-    }
-  ]
+
+/**
+ * Del instance form.
+ */
+function zenci_google_ce_instance_del($form, &$form_state) {
+
+  $templates = db_select('zenci_google_ce_templates', 'wr')
+    ->fields('wr')
+    ->orderBy('name', 'DESC')
+    ->execute()
+    ->fetchAll();
+
+  $options = array();
+  foreach ($templates as $template) {
+    $options[$template->name] = $template->name . " " . $template->machine_type . " " . $template->image_name . " " . $template->disk_size . " " . $template->disk_type;
+  }
+  $form['name'] = array(
+    '#type' => 'select',
+    '#title' => t('Template name'),
+    '#options' => $options,
+    '#description' => t('Please select template name.'),
+  );
+
+
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add instance'),
+  );
+
+  return $form;
 }
+
