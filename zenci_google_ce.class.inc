@@ -713,11 +713,15 @@ class GoogleComputeEngineAPI {
       }
       sleep(5);
       $this->reInitCurl();
-      $data = $this->getInstance($zone, $name);
-      if($data['status'] == 'RUNNING'){
-        $ip = $data['networkInterfaces'][0]->accessConfigs[0]->natIP;
-        backdrop_set_message('IP is: ' . $ip . " time " . (time() - $time) . " sec" );
-        return $data;
+      if($data = $this->getInstance($zone, $name)) {
+        if($data['status'] == 'RUNNING'){
+          $ip = $data['networkInterfaces'][0]->accessConfigs[0]->natIP;
+          backdrop_set_message('IP is: ' . $ip . " time " . (time() - $time) . " sec" );
+          return $data;
+        }
+      } 
+      else {
+        return FALSE;  
       }
     }
   }
