@@ -382,10 +382,10 @@ class GoogleComputeEngineAPI {
     $this->prepareCommand($command, $params);
 
     if ($this->getToken()) {
-      $this->curl->setHeader('Token', $this->getToken());
+      $this->curl->setHeader('Authorization', 'Bearer ' . $this->getToken());
     }
 
-    $this->curl->put(ZENCI_GOOGLE_CE_API_URI . '/' . $command, $params);
+    $this->curl->put(ZENCI_GOOGLE_CE_API_URI . '/' . $this->project_id . '/' . $command, $params);
     $response = $this->getResponse();
     return $response;
   }
@@ -433,7 +433,7 @@ class GoogleComputeEngineAPI {
       $this->curl->setHeader('Authorization', 'Bearer ' . $this->getToken());
     }
 
-    $this->curl->delete(ZENCI_GOOGLE_CE_API_URI . '/' . $command, $params);
+    $this->curl->delete(ZENCI_GOOGLE_CE_API_URI . '/' . $this->project_id . '/' . $command, $params);
     $response = $this->getResponse();
     return $response;
   }
@@ -729,39 +729,23 @@ class GoogleComputeEngineAPI {
   }
 
   /**
-   * Update hook for repository.
+   * Delete instance.
+   * https://cloud.google.com/compute/docs/reference/latest/instances/delete
    *
-   * @param $settings array
-   *   An array of settings for hook
-   *     - url: The URL to which the payloads will be delivered.
-   *     - secret: If provided, payloads will be delivered with an Signature
-   *   header.
+   * @name instance name
+   * @zone instance zone
    *
-   * @return
-   *   Return hook information or FALSE if there is no access.
-   *
-   * @see SetRepoName
-   * @see SetOwnerName
-   */
-  public function updateHook($settings) {
-    $settings[':owner'] = $this->owner_name;
-    $settings[':repo'] = $this->repo_name;
-    return $this->putRequest('repos/:owner/:repo/hook', $settings);
-  }
-
-  /**
-   * Delete hook for repository.
    * @return
    *   Return empty value if success or FALSE if error.
    *
    * @see SetRepoName
    * @see SetOwnerName
    */
-  public function deleteHook() {
+  public function deleteInstance($zone, $name) {
     return $this->deleteRequest(
-      'repos/:owner/:repo/hook', array(
-        ':owner' => $this->owner_name,
-        ':repo' => $this->repo_name,
+      'zones/:zone/instances/:instance', array(
+        ':zone' => $zone,
+        ':name' => $name,
       )
     );
   }

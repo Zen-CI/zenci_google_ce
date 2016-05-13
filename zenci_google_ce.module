@@ -276,7 +276,7 @@ function zenci_google_ce_create_instance($name, $template_name){
   
   $GoogleComputeEngineAPI = zenci_google_ce_get_class();
 
-  $instance =  $GoogleComputeEngineAPI->createInstance($name, $template);  
+  $instance = $GoogleComputeEngineAPI->createInstance($name, $template);  
   
   if($instance){
     $record = array(
@@ -296,4 +296,9 @@ function zenci_google_ce_create_instance($name, $template_name){
     }
   }
   return FALSE;
+}
+
+function zenci_google_ce_delete_instance($instance){
+  $GoogleComputeEngineAPI = zenci_google_ce_get_class();
+  return $GoogleComputeEngineAPI->deleteInstance($instance->zone, $instance->name);
 }

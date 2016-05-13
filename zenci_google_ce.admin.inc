@@ -394,9 +394,13 @@ function zenci_google_ce_instance_del_submit($form, &$form_state) {
   
   $instance = db_select('zenci_google_ce_instances', 'gh')
     ->fields('gh')
-    ->condition('id', $template_id)
+    ->condition('id', $instance_id)
     ->execute()
     ->fetchObject();
+    
+  $answer = zenci_google_ce_delete_instance($instance);
+
+  backdrop_set_message('<pre>' . print_r($answer,true). '</pre>');
   
 /*  db_delete('zenci_google_ce_instances')
     ->condition('id', $instance->id)
