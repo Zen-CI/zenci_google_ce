@@ -300,6 +300,5 @@ function zenci_google_ce_create_instance($name, $template_name){
 
 function zenci_google_ce_delete_instance($instance){
   $GoogleComputeEngineAPI = zenci_google_ce_get_class();
-  $GoogleComputeEngineAPI->setDebug(TRUE);
   return $GoogleComputeEngineAPI->deleteInstance($instance->zone, $instance->name);
 }
