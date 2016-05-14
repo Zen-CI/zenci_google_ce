@@ -262,10 +262,6 @@ function zenci_google_ce_get_class() {
   
   if(FALSE === $token){
     $token = $GoogleComputeEngineAPI->updateToken();
-    $config = config('zenci_google_ce.settings');
-    $config->set('token', $token['token']);
-    $config->set('token_expire', $token['expire']);
-    $config->save();
   }else{
     $GoogleComputeEngineAPI->setToken($token['token'], $token['expire']);
   }
