@@ -173,7 +173,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
            if($data['pull_request']){
              $prefix .= $data['pull_request'] . "-";
            }
-           $name = $data['branch'] . "-" . $data['repo_name'] . "-" . $data['repo_owner'];
+           $name = 'pr-' . $data['branch'] . "-" . $data['repo_name'] . "-" . $data['repo_owner'];
            if(isset($data['sha'])){
              $name = $name . "-" . substr($data['sha'], 0, 6);
            }
