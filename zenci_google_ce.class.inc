@@ -648,7 +648,7 @@ class GoogleComputeEngineAPI {
     $disk->autoDelete = TRUE;
     $disk->deviceName = $name . "-disk";
     $disk->initializeParams = new stdClass();;
-    $disk->initializeParams->sourceImage = 'projects/' . $this->project_id .'/global/images/php53';
+    $disk->initializeParams->sourceImage = 'projects/' . $this->project_id .'/global/images/backdrop-php53';
 
     $disk->initializeParams->diskType = 'projects/' . $this->project_id .'/zones/' . $zone. '/diskTypes/' . $template->disk_type;
     $disk->initializeParams->diskSizeGb = $template->disk_size;
@@ -678,7 +678,7 @@ class GoogleComputeEngineAPI {
     $instance_settings->networkInterfaces = array($network);
     $instance_settings->description = 'ZenCI testing eviorment';
     $instance_settings->scheduling = new stdClass();;
-    $instance_settings->scheduling->preemptible = FALSE;
+    $instance_settings->scheduling->preemptible = TRUE;
     $instance_settings->scheduling->onHostMaintenance = "TERMINATE";
     $instance_settings->scheduling->automaticRestart = FALSE;
 
