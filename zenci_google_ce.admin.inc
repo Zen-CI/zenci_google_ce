@@ -94,7 +94,7 @@ function zenci_google_ce_settings_submit($form, &$form_state) {
 }
 
 /**
- * Menu callback; Display a list of all Digital Ocean templates.
+ * Menu callback; Display a list of all templates.
  */
 function zenci_google_ce_templates() {
   $templates = db_select('zenci_google_ce_templates', 'wr')
@@ -156,7 +156,7 @@ function zenci_google_ce_template($form, &$form_state) {
     '#description' => t('This is a test task name.'),
     '#required' => TRUE,
   );
-  
+
   $MachineTypes = $GoogleComputeEngineAPI->getMachineTypes();
 
   $form['machine_type'] = array(
@@ -351,7 +351,7 @@ function zenci_google_ce_instance_submit($form, &$form_state) {
   if($instance){
     backdrop_set_message(t('Instance created'));
     backdrop_set_message('<pre>' . print_r($instance,true). '</pre>');
-  }  
+  }
 }
 
 /**
@@ -391,13 +391,13 @@ function zenci_google_ce_instance_del($form, &$form_state) {
  */
 function zenci_google_ce_instance_del_submit($form, &$form_state) {
   $instance_id = $form_state['values']['name'];
-  
+
   $instance = db_select('zenci_google_ce_instances', 'gh')
     ->fields('gh')
     ->condition('id', $instance_id)
     ->execute()
     ->fetchObject();
-    
+
   if(zenci_google_ce_delete_instance($instance)){
     backdrop_set_message(t('Instance !name deleted!', array('!name' => $instance->name )));
   }

@@ -1,9 +1,11 @@
 <?php
 /**
  * @file
- * Prepare testing environment on DigitalOcean.
+ * Prepare testing environment on Google Compute Engine.
  * Spin Up VPS to process tests and destroy after.
  */
+ 
+ define('ZENCI_GOOGLE_CE_TOKEN_RENEWAL', 600);
 
 /**
  * Implements hook_config_info().
@@ -26,7 +28,6 @@ function zenci_google_ce_permission() {
     ),
   );
 }
-
 
 /**
  * Implements hook_menu().
@@ -102,7 +103,7 @@ function zenci_google_ce_menu() {
     'file' => 'zenci_google_ce.admin.inc',
     'type' => MENU_CALLBACK,
   );
-  
+
 
   $items['zenci_joblist'] = array(
     'title' => 'ZenCI tests results',
@@ -111,8 +112,8 @@ function zenci_google_ce_menu() {
     'access callback' => 'user_access',
     'access arguments' => array('test job view'),
     'file' => 'zenci_google_ce.pages.inc',
-    'type' => MENU_NORMAL_ITEM,  
-  );  
+    'type' => MENU_NORMAL_ITEM,
+  );
 
   return $items;
 }
@@ -133,9 +134,9 @@ function zenci_google_ce_zenci_webhook($method, $data) {
        * @return
        *   array with 'config' value where gitlc.yml file is base64 encoded.
        */
-       
+
       // Create VPS and pass back deploy and testing structure.
-      
+
       $config_filepath = backdrop_get_path('module', 'zenci_google_ce') . '/gitlc.yml';
 
       if ($config = file_get_contents($config_filepath)) {
@@ -160,7 +161,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
        * @return
        *   array with 'env_vars'. All enviotment variables will be available via ENV in scripts.
        */
-       
+
        switch($data['action']){
          case 'create':
          case 'push':
@@ -178,11 +179,11 @@ function zenci_google_ce_zenci_webhook($method, $data) {
            $name = strtolower($name);
            $instance = zenci_google_ce_create_instance($name, $data['test']);
            sleep(15); // Extra 15 sec to allow SSH start up.
-           
+
            $answer = array();
            $answer['server'] = $instance['ip'];
            return $answer;
-         break;         
+         break;
        }
       break;
     case 'google_ce_after':
@@ -200,7 +201,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
        * @return
        *   array with 'env_vars'. All enviotment variables will be available via ENV in scripts.
        */
-       
+
        switch($data['action']){
          case 'create':
          case 'push':
@@ -224,73 +225,155 @@ function zenci_google_ce_zenci_webhook($method, $data) {
             if($instance){
              zenci_google_ce_delete_instance($instance);
             }
-           
-           
-         break;         
+
+
+         break;
        }
       break;
-      
+
   }
   return $data;
 }
 
-function zenci_google_ce_get_value($env_vars, $variable) {
-  if (isset($env_vars[$variable])) {
-    return $env_vars[$variable];
-  }
-  FALSE;
-}
-
+/**
+ * Get initilisated class object of GoogleComputeEngineAPI.
+ *
+ * @return
+ *   Return GoogleComputeEngineAPI object.
+ *
+ */
 function zenci_google_ce_get_class() {
   module_load_include('inc', 'zenci_google_ce', 'zenci_google_ce.class');
 
   $private_key = zenci_google_ce_get_private_key();
-  $project_id = zenci_google_ce_get_project_id();    
+  $project_id = zenci_google_ce_get_project_id();
 
   $GoogleComputeEngineAPI = new GoogleComputeEngineAPI();
-//  $GoogleComputeEngineAPI->setProjectID($project_id);
-//  $GoogleComputeEngineAPI->setPrivateKey($private_key);
+
+  $private_key = zenci_google_ce_get_private_key();
+  $project_id = zenci_google_ce_get_project_id();
+
+  $GoogleComputeEngineAPI->setProjectID($project_id);
+  $GoogleComputeEngineAPI->setPrivateKey($private_key);
+
+  $token = zenci_google_ce_get_token();
   
+  $GoogleComputeEngineAPI->setSaveTokenFunction('zenci_google_ce_save_token');
+  
+  if(FALSE === $token){
+    $token = $GoogleComputeEngineAPI->updateToken();
+    $config = config('zenci_google_ce.settings');
+    $config->set('token', $token['token']);
+    $config->set('token_expire', $token['expire']);
+    $config->save();
+  }else{
+    $GoogleComputeEngineAPI->setToken($token['token'], $token['expire']);
+  }
+
   return $GoogleComputeEngineAPI;
 }
 
-function zenci_google_ce_get_private_key() {
+/**
+ * Store temporary token in config for future reuse.
+ *
+ * @param $token token
+ * @param $expire token expire timestamp
+ *
+ */
+function zenci_google_ce_save_token($token, $expire){
+  $config = config('zenci_google_ce.settings');
+  $config->set('token', $token);
+  $config->set('token_expire', $expire);
+  $config->save();
+}
+
+/**
+ * Get temporary saved token.
+ *
+ * @return
+ *   FALSE if expired.
+ *
+ */
+function zenci_google_ce_get_token() {
   $config = config('zenci_google_ce.settings');
   
+  $token = $config->get('token');
+  if($token) {
+    $token_expire = $config->get('token_expire');
+    if($token_expire < time() + ZENCI_GOOGLE_CE_TOKEN_RENEWAL ) {
+      return FALSE;
+    }else{
+      return array(
+        'token' => $token,
+        'expire' => $token_expire,
+      );
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Get private key. Required to retrive new token
+ *
+ * @return
+ *   Return private key.
+ *
+ */
+function zenci_google_ce_get_private_key() {
+  $config = config('zenci_google_ce.settings');
+
   $private_key = settings_get('zenci_google_ce_private_key');
 
   if (empty($private_key)) {
-    $private_key = $config->get('private_key');  
+    $private_key = $config->get('private_key');
   }
 
   return $private_key;
 }
 
+/**
+ * Get project id.
+ *
+ * @return
+ *   Return project id.
+ *
+ */
 function zenci_google_ce_get_project_id() {
   $config = config('zenci_google_ce.settings');
-  
+
   $project_id = settings_get('zenci_google_ce_project_id');
 
   if (empty($project_id)) {
-    $project_id = $config->get('project_id');  
+    $project_id = $config->get('project_id');
   }
 
   return $project_id;
 }
 
+/**
+ * Create instance.
+ *
+ * @param $name instance name. 
+ *   Should be unique. 63 characters limit. Only numbers, low case letters and dash.
+ * @param $template_name Saved template name.
+ *
+ * @return
+ *   Return instance information or FALSE.
+ *
+ */
 function zenci_google_ce_create_instance($name, $template_name){
   $template = db_select('zenci_google_ce_templates', 'gh')
     ->fields('gh')
     ->condition('name', $template_name)
     ->execute()
     ->fetchObject();
-    
+
   watchdog('zenci_google_ce', ' Create instance !name !template_name', array('!name' => $name, '!template_name' => $template_name));
-  
+
   $GoogleComputeEngineAPI = zenci_google_ce_get_class();
 
-  $instance = $GoogleComputeEngineAPI->createInstance($name, $template);  
-  
+  $instance = $GoogleComputeEngineAPI->createInstance($name, $template);
+
   if($instance){
     $record = array(
       'name' => $name,
@@ -300,7 +383,7 @@ function zenci_google_ce_create_instance($name, $template_name){
       'branch' => 'branch', //branch name.
       'pr' => 0, //pr number
       'template' => $template_name,
-      'results' => 'some data here', 
+      'results' => 'some data here',
       'zone' => $instance['zone_name'],
       'ip' => $instance['ip_address']
     );
@@ -313,11 +396,20 @@ function zenci_google_ce_create_instance($name, $template_name){
   return FALSE;
 }
 
+/**
+ * Delete instance.
+ *
+ * @param $instance - instance object from database.
+ *
+ * @return
+ *   TRUE if success, FALSE if fail.
+ *
+ */
 function zenci_google_ce_delete_instance($instance){
   watchdog('zenci_google_ce', ' Delete instance !name', array('!name' => $instance->name));
 
   $GoogleComputeEngineAPI = zenci_google_ce_get_class();
-  
+
   $answer = $GoogleComputeEngineAPI->deleteInstance($instance->zone, $instance->name);
   if(is_array($answer) && isset($answer['status'])){
     db_delete('zenci_google_ce_instances')

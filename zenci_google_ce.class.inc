@@ -35,13 +35,20 @@ class GoogleComputeEngineAPI {
    * @var string
    */
   protected $token = '';
-  
+
   /**
    * Token expire time.
    *
    * @var string
    */
   protected $token_expire = '';
+
+  /**
+   * Call back function to store token.
+   *
+   * @var string
+   */
+  protected $save_token_function = FALSE;
 
   /**
    * Organisation or User name.
@@ -91,16 +98,6 @@ class GoogleComputeEngineAPI {
   public function __construct() {
     $this->reInitCurl();
     $this->setDebug();
-    $this->private_key = zenci_google_ce_get_private_key();
-    $this->project_id = zenci_google_ce_get_project_id();
-    $config = config('zenci_google_ce.settings');
-    $token = $config->get('token');
-    if($token) {
-      $this->token = $token;
-      $this->token_expire = $config->get('token_expire');    
-    }else{
-      $this->getToken();
-    }
   }
 
   /**
@@ -153,11 +150,18 @@ class GoogleComputeEngineAPI {
    */
   private function setToken($token, $expire) {
     $this->token = $token;
-    $this->token_expire = $expire;    
-    $config = config('zenci_google_ce.settings');
-    $config->set('token', $token);
-    $config->set('token_expire', $expire);
-    $config->save();
+    $this->token_expire = $expire;
+    $this->callSaveTokenCallback();
+  }
+
+  /**
+   * Set Callback function to store token.
+   *
+   * @param $function
+   *   Callback function
+   */
+  public function setSaveTokenFunction($function) {
+    $this->save_token_function = $function;
   }
 
   /**
@@ -167,26 +171,24 @@ class GoogleComputeEngineAPI {
    *   A string value. Stored token for GoogleComputeEngine API access.
    */
   public function getToken() {
-    
-    if(empty($this->token) or $this->token_expire < time() + 300 ) {
-      
-      // Check file first. Maybe it is updated already.
-      $config = config('zenci_google_ce.settings');
-      $token = $config->get('token');
-      $token_expire = $config->get('token_expire');
-      
-      if($token && $token_expire > time() + 300 ) {
-        $this->token = $token;
-        $this->token_expire = $token_expire;
-      }
-      else{
-        // Time to get new token.
-        $this->updateToken();
-      }
+
+    if(empty($this->token) or $this->token_expire < time() + ZENCI_GOOGLE_CE_TOKEN_RENEWAL ) {
+      // Time to get new token.
+      $this->updateToken();
     }
     return $this->token;
   }
-  
+
+  /**
+   * Call callback function to store Token.
+   */
+  private function callSaveTokenCallback() {
+    if($this->save_token_function){
+      $function = $this->save_token_function;
+      $function($this->token, $this->token_expire);
+    }
+  }
+
   /**
    * Update Token.
    */
@@ -195,11 +197,11 @@ class GoogleComputeEngineAPI {
       'alg' => 'RS256',
       'typ' => 'JWT',
     );
-    
+
     $header_json = json_encode($header);
-    
+
     $time = time();
-    
+
     $claim = array(
       'iss' => $this->project_id . '@' . ZENCI_GOOGLE_CE_PROJECT_DOMAIN,
       'scope' => ZENCI_GOOGLE_CE_SCOPE,
@@ -207,26 +209,26 @@ class GoogleComputeEngineAPI {
       'exp' => $time + 3600,
       'iat' => $time,
     );
-    
+
     $claim_json = json_encode($claim);
-    
+
     $request = base64_encode($header_json) . '.' . base64_encode($claim_json);
     $signature_base_encoded = $this->signRequest($request);
-    
+
     $assertion = $request . '.' . $signature_base_encoded;
-    
+
     $params = array(
       'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
       'assertion' => $request . '.' . $signature_base_encoded,
     );
-    
+
     $curl = new Curl();
     $curl->setHeader('Content-Type', 'application/x-www-form-urlencoded');
     $curl->setUserAgent('Backdrop CMS ZenCI GoogleComputeEngine API module');
     $curl->setHeader('Accept', '*/*');
-    
+
     $curl->post(ZENCI_GOOGLE_OAUTH_TOKEN_URI, $params);
-    
+
     if ($this->isError()) {
       throw new Exception('GoogleComputeEngineAPI: ' . $this->curl->curlErrorCode . ' ' . $this->curl->response->message);
     }
@@ -234,9 +236,9 @@ class GoogleComputeEngineAPI {
       $this->setToken($curl->response->access_token, $time + $curl->response->expires_in);
     }
   }
-  
+
   /**
-   * Update Token.
+   * sign Request for Token reguest.
    */
   private function signRequest($reguest) {
     $signature = null;
@@ -490,7 +492,7 @@ class GoogleComputeEngineAPI {
     }
     return $answer;
   }
-  
+
    /**
    * Get Images information.
    * https://cloud.google.com/compute/docs/reference/latest/images/list
@@ -501,15 +503,15 @@ class GoogleComputeEngineAPI {
    *
    */
   public function getPublicImages($project) {
-    
+
     // We update token before call to make sure that token is updated.
     $this->getToken();
-    
+
     $current_project_id = $this->project_id;
     $this->project_id = $project;
     $answer = $this->getRequest('global/images');
     $this->project_id = $current_project_id;
-    
+
     if(isset($answer['items'])){
       return $answer['items'];
     }
@@ -533,7 +535,7 @@ class GoogleComputeEngineAPI {
     }
     return $answer;
   }
-  
+
 
   /**
    * Get aggregated machineTypes information.
@@ -544,7 +546,7 @@ class GoogleComputeEngineAPI {
    *
    */
   public function getMachineTypes($zone = '') {
-    
+
     $cmd = 'aggregated/machineTypes';
     if($zone) {
       $cmd = 'zones/' . $zone . '/machineTypes';
@@ -562,7 +564,7 @@ class GoogleComputeEngineAPI {
     }
     return $answer;
   }
-  
+
   /**
    * Get zones that support provided machineType.
    * https://cloud.google.com/compute/docs/reference/latest/machineTypes/aggregatedList
@@ -572,7 +574,7 @@ class GoogleComputeEngineAPI {
    *
    */
   public function getZonesByMachineType($machine_type) {
-    
+
     $params = array(
       'filter' => 'name eq ' . $machine_type,
     );
@@ -589,27 +591,6 @@ class GoogleComputeEngineAPI {
   }
 
   /**
-   * Create droplet.
-   * https://developers.digitalocean.com/documentation/v2/#create-a-new-droplet
-   *
-   * @param $settings array
-   *   An array of settings for droplet
-   *     - name: The name for droplet. REQUIRED
-   *     - region: The region for droplet.  REQUIRED
-   *     - size: The size for droplet.  REQUIRED
-   *     - image: The image for droplet.  REQUIRED
-   *     - ssh_keys: The ssh_keys for droplet.
-   *     - backups: The backups for droplet.
-   *     - ipv6: The ipv6 for droplet. TRUE or FALSE
-   *     - user_data: The user_data for droplet.
-   *     - private_networking: The private_networking for droplet.
-   *
-   * @return
-   *   Return droplet information or FALSE if there is no access.
-   *
-   */
-   
-  /**
    * Get Instance information.
    * https://cloud.google.com/compute/docs/reference/latest/instances/get
    *
@@ -622,7 +603,7 @@ class GoogleComputeEngineAPI {
     $answer = $this->getRequest('zones/' . $zone . '/instances/' . $name);
     return $answer;
   }
-  
+
   /**
    * Create Instance.
    * https://cloud.google.com/compute/docs/reference/latest/instances/insert
@@ -640,26 +621,27 @@ class GoogleComputeEngineAPI {
    *
    */
   public function createInstance($name, $template) {
-    
+
     $zones = $this->getZonesByMachineType($template->machine_type);
-    
+
     $zone = $zones[rand(0,count($zones) - 1)];
     $this->reInitCurl();
-    
+
+    // Need to provide key via setParam function.
     $key = new stdClass();
     $key->key = "ssh-keys";
     $key->value = "root:ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAtU034MgQ7NRqM1neyR/VzJuEfH75klZjXSjGUHcRbVnxBP6fsf/tPRT6cmYMqkZtWZfl3HNV5+x2Wb0me4lww2ZFWnN/chyYNh6uRmzxf+fgrlCvjY1a71TVv2AjILM/6gK68oc0575WEhEs0nEDi8Mj3kjPIwmBQa2H+Ul9gqjCnJchVtfNKDf8vK4Nf2oTemzq5U1AIJu+6ha/EY6gCin1U2OOKZHE8YoG7QS980YQWqlk+9oZueXMQuOc1SZDr8MJqbu+5jZpW26dsYaeC+fO7LYT+vitOWIe0XjpTQkaGesfNzkqfg4nPZeSsX4wtyVabdbhSK0JZPEErd6PCQ== root@coral.vps-private.net";
-    
+
     $metadata = new stdClass();
     $metadata->items[] = $key;
-    
-    $tags = new stdClass();  
-    
+
+    $tags = new stdClass();
+
     $tags->items[] = 'http-server';
     $tags->items[] = 'https-server';
-    
+
     $disk = new stdClass();
-    
+
     $disk->type = 'PERSISTENT';
     $disk->boot = TRUE;
     $disk->mode = 'READ_WRITE';
@@ -667,24 +649,24 @@ class GoogleComputeEngineAPI {
     $disk->deviceName = $name . "-disk";
     $disk->initializeParams = new stdClass();;
     $disk->initializeParams->sourceImage = 'projects/' . $this->project_id .'/global/images/php53';
-    
+
     $disk->initializeParams->diskType = 'projects/' . $this->project_id .'/zones/' . $zone. '/diskTypes/' . $template->disk_type;
     $disk->initializeParams->diskSizeGb = $template->disk_size;
-    
+
     $network_accessConfigs = new stdClass();
 
     $network_accessConfigs->name = "External NAT";
     $network_accessConfigs->type = "ONE_TO_ONE_NAT";
-         
+
     $network = new stdClass();
     $network->network = "projects/" . $this->project_id . "/global/networks/default";
     $network->accessConfigs = array($network_accessConfigs);
-    
+
     $serviceAccount = new stdClass();
-    
+
     $serviceAccount->email = $this->project_id . "@" . ZENCI_GOOGLE_CE_PROJECT_DOMAIN;
     $serviceAccount->scopes = array(ZENCI_GOOGLE_CE_INSTANCE_SCOPE);
-    
+
     $instance_settings = new stdClass();
     $instance_settings->name = $name;
     $instance_settings->zone = "projects/" . $this->project_id . "/zones/" . $zone;
@@ -699,13 +681,9 @@ class GoogleComputeEngineAPI {
     $instance_settings->scheduling->preemptible = TRUE;
     $instance_settings->scheduling->onHostMaintenance = "TERMINATE";
     $instance_settings->scheduling->automaticRestart = FALSE;
-    
-//    $instance_settings->serviceAccounts = array($serviceAccount);
- 
- 
-    $time = time();
+
     $answer =  $this->postRequest('zones/' . $zone . '/instances', (array)$instance_settings);
-    
+
     $count = 1;
     while(TRUE){
       $count ++;
@@ -717,14 +695,13 @@ class GoogleComputeEngineAPI {
       if($data = $this->getInstance($zone, $name)) {
         if($data['status'] == 'RUNNING'){
           $ip = $data['networkInterfaces'][0]->accessConfigs[0]->natIP;
-          backdrop_set_message('IP is: ' . $ip . " time " . (time() - $time) . " sec" );
           $data['zone_name'] = $zone;
           $data['ip_address'] = $ip;
           return $data;
         }
-      } 
+      }
       else {
-        return FALSE;  
+        return FALSE;
       }
     }
   }
