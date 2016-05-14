@@ -192,7 +192,7 @@ class GoogleComputeEngineAPI {
   /**
    * Update Token.
    */
-  private function updateToken() {
+  public function updateToken() {
     $header = array(
       'alg' => 'RS256',
       'typ' => 'JWT',
