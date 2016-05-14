@@ -678,7 +678,7 @@ class GoogleComputeEngineAPI {
     $instance_settings->networkInterfaces = array($network);
     $instance_settings->description = 'ZenCI testing eviorment';
     $instance_settings->scheduling = new stdClass();;
-    $instance_settings->scheduling->preemptible = TRUE;
+    $instance_settings->scheduling->preemptible = FALSE;
     $instance_settings->scheduling->onHostMaintenance = "TERMINATE";
     $instance_settings->scheduling->automaticRestart = FALSE;
 
