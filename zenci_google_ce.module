@@ -223,7 +223,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
               ->execute()
               ->fetchObject();
             if($instance){
-             zenci_google_ce_delete_instance($instance);
+              // zenci_google_ce_delete_instance($instance);
             }
 
 
