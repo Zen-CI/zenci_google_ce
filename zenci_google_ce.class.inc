@@ -148,7 +148,7 @@ class GoogleComputeEngineAPI {
    * @param $expire_timestamp
    *   Expiration Timestamp.
    */
-  private function setToken($token, $expire) {
+  public function setToken($token, $expire) {
     $this->token = $token;
     $this->token_expire = $expire;
     $this->callSaveTokenCallback();
