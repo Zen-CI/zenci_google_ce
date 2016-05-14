@@ -166,6 +166,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
          case 'create':
          case 'push':
          case 'opened':
+         case 'reopened':         
          case 'synchronize':
            // create VPS
            $prefix = '';
