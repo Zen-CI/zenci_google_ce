@@ -177,6 +177,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
            if(isset($data['sha'])){
              $name = $name . "-" . substr($data['sha'], 0, 6);
            }
+           $name = str_replace(array('.', ',', '!'), (''), $name);
            $name = strtolower($name);
            $instance = zenci_google_ce_create_instance($name, $data['test']);
            sleep(15); // Extra 15 sec to allow SSH start up.
@@ -218,6 +219,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
              $name = $name . "-" . substr($data['sha'], 0, 6);
            }
            $name = strtolower($name);
+           $name = str_replace(array('.', ',', '!'), (''), $name);
            $instance = db_select('zenci_google_ce_instances', 'gh')
               ->fields('gh')
               ->condition('name', $name)
