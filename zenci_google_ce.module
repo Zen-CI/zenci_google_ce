@@ -169,16 +169,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
          case 'reopened':         
          case 'synchronize':
            // create VPS
-           $name = '';
-           if($data['pull_request']){
-             $name .= 'pr-' . $data['pull_request'] . "-";
-           }
-           $name = $data['branch'] . "-" . $data['repo_name'] . "-" . $data['repo_owner'];
-           if(isset($data['sha'])){
-             $name = $name . "-" . substr($data['sha'], 0, 6);
-           }
-           $name = str_replace(array('.', ',', '!'), (''), $name);
-           $name = strtolower($name);
+           $name = zenci_instance_name_check($data);
            $instance = zenci_google_ce_create_instance($name, $data['test']);
            sleep(15); // Extra 15 sec to allow SSH start up.
 
@@ -210,16 +201,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
          case 'opened':
          case 'synchronize':
            // destroy VPS
-           $name = '';
-           if($data['pull_request']){
-             $name .= 'pr-' . $data['pull_request'] . "-";
-           }
-           $name = $data['branch'] . "-" . $data['repo_name'] . "-" . $data['repo_owner'];
-           if(isset($data['sha'])){
-             $name = $name . "-" . substr($data['sha'], 0, 6);
-           }
-           $name = strtolower($name);
-           $name = str_replace(array('.', ',', '!'), (''), $name);
+           $name = zenci_instance_name_check($data);
            $instance = db_select('zenci_google_ce_instances', 'gh')
               ->fields('gh')
               ->condition('name', $name)
@@ -236,6 +218,39 @@ function zenci_google_ce_zenci_webhook($method, $data) {
 
   }
   return $data;
+}
+
+/**
+ * Get initilisated class object of GoogleComputeEngineAPI.
+ *
+ * @param $data array 
+ *
+ * @return string
+ *   Return valid name for instance and disk.
+ *   Values must match the following regular expression: '[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?'" } 
+ *
+ */
+function zenci_instance_build_name($data){
+  $name = '';
+  if($data['pull_request']){
+    $name .= 'pr-' . $data['pull_request'] . "-";
+  }
+  $name .= $data['branch'] . "-" . $data['repo_name'] . "-" . $data['repo_owner'];
+ 
+  if(isset($data['sha'])){
+   $name .= "-" . substr($data['sha'], 0, 6);
+  }
+  
+  $name = strtolower($name);
+  $name = preg_replace('~[^-a-z0-9]+~', '', $name);
+           
+  if(strlen($name) > 60){
+    $name = substr($name, 0, 60);
+  }
+  if(is_numeric($name[0])){
+    $name = 'z' . $name;
+  }
+  return $name;
 }
 
 /**
