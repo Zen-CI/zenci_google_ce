@@ -169,7 +169,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
          case 'reopened':         
          case 'synchronize':
            // create VPS
-           $name = zenci_instance_name_check($data);
+           $name = zenci_instance_build_name($data);
            $instance = zenci_google_ce_create_instance($name, $data['test']);
            sleep(15); // Extra 15 sec to allow SSH start up.
 
@@ -201,7 +201,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
          case 'opened':
          case 'synchronize':
            // destroy VPS
-           $name = zenci_instance_name_check($data);
+           $name = zenci_instance_build_name($data);
            $instance = db_select('zenci_google_ce_instances', 'gh')
               ->fields('gh')
               ->condition('name', $name)
