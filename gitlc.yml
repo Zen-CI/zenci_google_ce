@@ -12,6 +12,18 @@ test:
         before_deploy: http://backdrop.zen.ci/webhook/google_ce_before
         after_deploy: http://backdrop.zen.ci/webhook/google_ce_after
       undeploy: false
+    test2:
+      username: 'test'
+      password: 'test'
+      dir: '{home}/github/branch/{branch}'
+      scripts:
+        init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
+      tests:
+        - '{deploy_dir}/core/misc/zen-ci/run_tests.sh'
+      webhooks:
+        before_deploy: http://backdrop.zen.ci/webhook/google_ce_before
+        after_deploy: http://backdrop.zen.ci/webhook/google_ce_after
+      undeploy: false      
     pull_request:
       username: 'test'
       password: 'test'
