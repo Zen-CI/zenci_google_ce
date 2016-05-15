@@ -665,13 +665,13 @@ class GoogleComputeEngineAPI {
     $disk->deviceName = $name . "-disk";
     $disk->initializeParams = new stdClass();
     
-    list($project, $name) = explode(":", $template->image_name);
+    list($project, $image_name) = explode(":", $template->image_name);
     
     if($project == 'private'){
-      $sourceImage = 'projects/' . $this->project_id .'/global/images/' . $name;
+      $sourceImage = 'projects/' . $this->project_id .'/global/images/' . $image_name;
     }
     else {
-      $sourceImage = 'projects/' . $project .'/global/images/' . $name;
+      $sourceImage = 'projects/' . $project .'/global/images/' . $image_name;
     }
     
     $disk->initializeParams->sourceImage = $sourceImage;
