@@ -236,6 +236,10 @@ function zenci_instance_build_name($data){
     $name .= 'pr-' . $data['pull_request'] . "-";
   }
   $name .= $data['branch'] . "-" . $data['repo_name'] . "-" . $data['repo_owner'];
+
+  if(strlen($name) > 15){
+    $name = substr($name, 0, 15);
+  }
  
   if(isset($data['sha'])){
    $name .= "-" . substr($data['sha'], 0, 6);
