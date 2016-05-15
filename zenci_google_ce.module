@@ -274,9 +274,11 @@ function zenci_google_ce_get_class() {
 
   $private_key = zenci_google_ce_get_private_key();
   $project_id = zenci_google_ce_get_project_id();
+  $ssh_public_key = zenci_google_ce_get_ssh_public_key();
 
   $GoogleComputeEngineAPI->setProjectID($project_id);
   $GoogleComputeEngineAPI->setPrivateKey($private_key);
+  $GoogleComputeEngineAPI->setSSHPublicKey($ssh_public_key);
 
   $token = zenci_google_ce_get_token();
   
@@ -367,6 +369,26 @@ function zenci_google_ce_get_project_id() {
 
   return $project_id;
 }
+
+/**
+ * Get private key. Required to retrive new token
+ *
+ * @return
+ *   Return private key.
+ *
+ */
+function zenci_google_ce_get_ssh_public_key() {
+  $config = config('zenci_google_ce.settings');
+
+  $ssh_public_key = settings_get('zenci_google_ce_ssh_public_key');
+
+  if (empty($ssh_public_key)) {
+    $ssh_public_key = $config->get('ssh_public_key');
+  }
+
+  return $ssh_public_key;
+}
+
 
 /**
  * Create instance.

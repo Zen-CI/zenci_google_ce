@@ -93,6 +93,13 @@ class GoogleComputeEngineAPI {
   protected $private_key;
 
   /**
+   * SSH Public Key.
+   *
+   * @var string
+   */
+  protected $ssh_public_key;
+
+  /**
    * Constructor.
    */
   public function __construct() {
@@ -140,6 +147,15 @@ class GoogleComputeEngineAPI {
     $this->private_key = $private_key;
   }
 
+  /**
+   * Set SSHPublicKey value. False by default.
+   *
+   * @param $ssh_public_key
+   *   PublicKey to set auth ssh key.
+   */
+  public function setSSHPublicKey($ssh_public_key) {
+    $this->ssh_public_key = $ssh_public_key;
+  }
   /**
    * Set token for GoogleComputeEngine API.
    *
@@ -630,7 +646,7 @@ class GoogleComputeEngineAPI {
     // Need to provide key via setParam function.
     $key = new stdClass();
     $key->key = "ssh-keys";
-    $key->value = "root:ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAtU034MgQ7NRqM1neyR/VzJuEfH75klZjXSjGUHcRbVnxBP6fsf/tPRT6cmYMqkZtWZfl3HNV5+x2Wb0me4lww2ZFWnN/chyYNh6uRmzxf+fgrlCvjY1a71TVv2AjILM/6gK68oc0575WEhEs0nEDi8Mj3kjPIwmBQa2H+Ul9gqjCnJchVtfNKDf8vK4Nf2oTemzq5U1AIJu+6ha/EY6gCin1U2OOKZHE8YoG7QS980YQWqlk+9oZueXMQuOc1SZDr8MJqbu+5jZpW26dsYaeC+fO7LYT+vitOWIe0XjpTQkaGesfNzkqfg4nPZeSsX4wtyVabdbhSK0JZPEErd6PCQ== root@coral.vps-private.net";
+    $key->value = $this->ssh_public_key;
 
     $metadata = new stdClass();
     $metadata->items[] = $key;

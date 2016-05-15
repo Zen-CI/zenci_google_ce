@@ -32,6 +32,17 @@ function zenci_google_ce_settings() {
     '#disabled' => !empty($private_key) ? TRUE : FALSE,
   );
 
+  // Use setting.php values if exists.
+  $ssh_public_key = settings_get('zenci_google_ce_ssh_public_key');
+  $form['ssh_public_key'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Private Key'),
+    '#default_value' => !empty($ssh_public_key) ? $ssh_public_key : $config->get('ssh_public_key'),
+    '#description' => t('Metadata public key. Format: user:publickey.'),
+    '#disabled' => !empty($ssh_public_key) ? TRUE : FALSE,
+  );
+
+
   $token = $config->get('token');
 
   if($token){
@@ -86,7 +97,13 @@ function zenci_google_ce_settings_submit($form, &$form_state) {
   if (empty($private_key)) {
     $config->set('private_key', $form_state['values']['private_key']);
   }
+  
+  // Use setting.php values if exists.
+  $ssh_public_key = settings_get('zenci_google_ce_ssh_public_key');
 
+  if (empty($ssh_public_key)) {
+    $config->set('ssh_public_key', $form_state['values']['ssh_public_key']);
+  }
 
   $config->save();
 
