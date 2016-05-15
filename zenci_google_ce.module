@@ -4,7 +4,7 @@
  * Prepare testing environment on Google Compute Engine.
  * Spin Up VPS to process tests and destroy after.
  */
- 
+
  define('ZENCI_GOOGLE_CE_TOKEN_RENEWAL', 600);
 
 /**
@@ -166,7 +166,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
          case 'create':
          case 'push':
          case 'opened':
-         case 'reopened':         
+         case 'reopened':
          case 'synchronize':
            // create VPS
            $name = zenci_instance_build_name($data);
@@ -199,6 +199,7 @@ function zenci_google_ce_zenci_webhook($method, $data) {
          case 'create':
          case 'push':
          case 'opened':
+         case 'reopened':
          case 'synchronize':
            // destroy VPS
            $name = zenci_instance_build_name($data);
@@ -223,11 +224,11 @@ function zenci_google_ce_zenci_webhook($method, $data) {
 /**
  * Get initilisated class object of GoogleComputeEngineAPI.
  *
- * @param $data array 
+ * @param $data array
  *
  * @return string
  *   Return valid name for instance and disk.
- *   Values must match the following regular expression: '[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?'" } 
+ *   Values must match the following regular expression: '[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?'" }
  *
  */
 function zenci_instance_build_name($data){
@@ -240,14 +241,14 @@ function zenci_instance_build_name($data){
   if(strlen($name) > 15){
     $name = substr($name, 0, 15);
   }
- 
+
   if(isset($data['sha'])){
    $name .= "-" . substr($data['sha'], 0, 6);
   }
-  
+
   $name = strtolower($name);
   $name = preg_replace('~[^-a-z0-9]+~', '', $name);
-           
+
   if(strlen($name) > 60){
     $name = substr($name, 0, 60);
   }
@@ -281,9 +282,9 @@ function zenci_google_ce_get_class() {
   $GoogleComputeEngineAPI->setSSHPublicKey($ssh_public_key);
 
   $token = zenci_google_ce_get_token();
-  
+
   $GoogleComputeEngineAPI->setSaveTokenFunction('zenci_google_ce_save_token');
-  
+
   if(FALSE === $token){
     $token = $GoogleComputeEngineAPI->updateToken();
   }else{
@@ -316,7 +317,7 @@ function zenci_google_ce_save_token($token, $expire){
  */
 function zenci_google_ce_get_token() {
   $config = config('zenci_google_ce.settings');
-  
+
   $token = $config->get('token');
   if($token) {
     $token_expire = $config->get('token_expire');
@@ -393,7 +394,7 @@ function zenci_google_ce_get_ssh_public_key() {
 /**
  * Create instance.
  *
- * @param $name instance name. 
+ * @param $name instance name.
  *   Should be unique. 63 characters limit. Only numbers, low case letters and dash.
  * @param $template_name Saved template name.
  *
