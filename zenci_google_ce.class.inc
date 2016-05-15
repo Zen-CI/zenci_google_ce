@@ -663,8 +663,18 @@ class GoogleComputeEngineAPI {
     $disk->mode = 'READ_WRITE';
     $disk->autoDelete = TRUE;
     $disk->deviceName = $name . "-disk";
-    $disk->initializeParams = new stdClass();;
-    $disk->initializeParams->sourceImage = 'projects/' . $this->project_id .'/global/images/backdrop-php53';
+    $disk->initializeParams = new stdClass();
+    
+    list($project, $name) = explode(":", $template->image_name);
+    
+    if($project == 'private'){
+      $sourceImage = 'projects/' . $this->project_id .'/global/images/' . $name;
+    }
+    else {
+      $sourceImage = 'projects/' . $project .'/global/images/' . $name;
+    }
+    
+    $disk->initializeParams->sourceImage = $sourceImage;
 
     $disk->initializeParams->diskType = 'projects/' . $this->project_id .'/zones/' . $zone. '/diskTypes/' . $template->disk_type;
     $disk->initializeParams->diskSizeGb = $template->disk_size;
