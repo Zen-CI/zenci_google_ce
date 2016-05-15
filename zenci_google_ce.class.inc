@@ -683,22 +683,26 @@ class GoogleComputeEngineAPI {
     $serviceAccount->email = $this->project_id . "@" . ZENCI_GOOGLE_CE_PROJECT_DOMAIN;
     $serviceAccount->scopes = array(ZENCI_GOOGLE_CE_INSTANCE_SCOPE);
 
-    $instance_settings = new stdClass();
-    $instance_settings->name = $name;
-    $instance_settings->zone = "projects/" . $this->project_id . "/zones/" . $zone;
-    $instance_settings->machineType = "projects/" . $this->project_id . "/zones/" . $zone ."/machineTypes/" . $template->machine_type;
-    $instance_settings->metadata = $metadata;
-    $instance_settings->tags = $tags;
-    $instance_settings->disks = array($disk);
-    $instance_settings->canIpForward = FALSE;
-    $instance_settings->networkInterfaces = array($network);
-    $instance_settings->description = 'ZenCI testing eviorment';
-    $instance_settings->scheduling = new stdClass();;
-    $instance_settings->scheduling->preemptible = TRUE;
-    $instance_settings->scheduling->onHostMaintenance = "TERMINATE";
-    $instance_settings->scheduling->automaticRestart = FALSE;
+    $scheduling = new stdClass();
+    $scheduling->preemptible = TRUE;
+    $scheduling->onHostMaintenance = "TERMINATE";
+    $scheduling->automaticRestart = FALSE;
 
-    $answer =  $this->postRequest('zones/' . $zone . '/instances', (array)$instance_settings);
+    $instance_settings = array(
+      'name' => $name,
+      'zone' => "projects/" . $this->project_id . "/zones/" . $zone,
+      'machineType' => "projects/" . $this->project_id . "/zones/" . $zone ."/machineTypes/" . $template->machine_type,
+      'metadata' => $metadata,
+      'tags' => $tags,
+      'disks' => array($disk),
+      'canIpForward' => FALSE,
+      'networkInterfaces' => array($network),
+      'description' => 'ZenCI testing eviorment',
+      'scheduling' => $scheduling,
+      ':zone' => $zone,
+    );
+
+    $answer =  $this->postRequest('zones/:zone/instances', $instance_settings);
 
     $count = 1;
     while(TRUE){
