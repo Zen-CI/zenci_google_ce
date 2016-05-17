@@ -210,9 +210,13 @@ function zenci_google_ce_zenci_webhook($method, $data) {
               ->fetchObject();
             if($instance){
               zenci_google_ce_delete_instance($instance);
+              return t('Instance !name deleted', array('!name' => $name));
+            }else{
+              return array(
+                'error' => TRUE,
+                'message' => t('There is no instance !name', array('!name' => $name)),
+              );
             }
-
-
          break;
        }
       break;
