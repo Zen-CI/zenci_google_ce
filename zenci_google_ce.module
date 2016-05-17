@@ -171,11 +171,18 @@ function zenci_google_ce_zenci_webhook($method, $data) {
            // create VPS
            $name = zenci_instance_build_name($data);
            $instance = zenci_google_ce_create_instance($name, $data['test']);
-           sleep(15); // Extra 15 sec to allow SSH start up.
+           
+            if(is_string($instance)){
+              $answer = array(
+                'error' => TRUE,
+                'message' => $instance,
+              );
+              return $answer;           
+            }
+            sleep(15); // Extra 15 sec to allow SSH start up.
 
-           $answer = array();
-           $answer['server'] = $instance['ip'];
-           return $answer;
+            $answer['server'] = $instance['ip'];
+            return $answer;
          break;
        }
       break;
@@ -436,6 +443,7 @@ function zenci_google_ce_create_instance($name, $template_name){
       return $record;
     }
   } else {
+    return $GoogleComputeEngineAPI->getGoogleCEErrorMessage();
     watchdog('zenci_google_ce', 'Create false : ' . print_r($GoogleComputeEngineAPI->testingGetHeaders(),true));
   }
   return FALSE;
