@@ -11,6 +11,7 @@ test:
       webhooks:
         before_deploy: http://backdrop.zen.ci/webhook/google_ce_before
         after_deploy: http://backdrop.zen.ci/webhook/google_ce_after
+        fail_deploy: http://backdrop.zen.ci/webhook/google_ce_after
       undeploy: false
     test2:
       username: 'test'
@@ -36,4 +37,5 @@ test:
       webhooks:
         before_deploy: http://backdrop.zen.ci/webhook/google_ce_before
         after_deploy: http://backdrop.zen.ci/webhook/google_ce_after
+        fail_deploy: http://backdrop.zen.ci/webhook/google_ce_after
       undeploy: false
