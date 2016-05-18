@@ -23,6 +23,7 @@ test:
       webhooks:
         before_deploy: http://backdrop.zen.ci/webhook/google_ce_before
         after_deploy: http://backdrop.zen.ci/webhook/google_ce_after
+        fail_deploy: http://backdrop.zen.ci/webhook/google_ce_after
       undeploy: false      
     pull_request:
       username: 'test'
