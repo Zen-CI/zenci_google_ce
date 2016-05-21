@@ -1,13 +1,7 @@
 test:
   php53:
     branch:
-      box:
-        machine: 'quadro'
-        image: 'backdrop-php53'
-        disk:
-          type: SSD
-          size: 10
-        destroy: false  
+      box: 'backdrop-php53'
       dir: '{home}/github/branch/{branch}'
       scripts:
         init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
@@ -15,6 +9,21 @@ test:
         - '{deploy_dir}/core/misc/zen-ci/run_tests.sh'
     pull_request:
       box: 'backdrop-php53'
+      dir: '{home}/github/pr/{pr_number}'
+      scripts:
+        init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
+      tests:
+        - '{deploy_dir}/core/misc/zen-ci/run_tests.sh'
+  php70:
+    branch:
+      box: 'backdrop-php70'
+      dir: '{home}/github/branch/{branch}'
+      scripts:
+        init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
+      tests:
+        - '{deploy_dir}/core/misc/zen-ci/run_tests.sh'
+    pull_request:
+      box: 'backdrop-php70'
       dir: '{home}/github/pr/{pr_number}'
       scripts:
         init: '{deploy_dir}/core/misc/zen-ci/init_test.sh'
